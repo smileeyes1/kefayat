@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://smileeyes1.github.io/kefayat/schema/competency.schema.json",
+  "title": "Kefayat Competency Record",
+  "type": "object",
+  "required": ["id", "grade", "subject", "provenance", "source_text"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^G[1-4]-[A-Z]+-[0-9]{3,}$"},
+    "grade": {"type": "integer", "enum": [1,2,3,4]},
+    "subject": {"type": "string", "enum": ["arabic", "mathematics", "islamic_education", "nurturing"]},
+    "domain": {"type": ["string", "null"]},
+    "main_competency": {"type": ["string", "null"]},
+    "sub_competency": {"type": ["string", "null"]},
+    "criterion": {"type": ["string", "null"]},
+    "learning_outcomes": {"type": "array", "items": {"type": "string"}},
+    "mastery_levels": {
+      "type": "object",
+      "properties": {
+        "يتقن": {"type": ["string", "null"]},
+        "يطور": {"type": ["string", "null"]},
+        "يحاول": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "values": {"type": "array", "items": {"type": "string"}},
+    "provenance": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["USER-PROVIDED REFERENCE", "OFFICIAL VERIFIED SOURCE", "INFERENCE", "UNPROVEN"]},
+        "source_id": {"type": ["string", "null"]},
+        "location": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "source_text": {"type": "string", "minLength": 1},
+    "normalized": {"type": ["object", "null"]}
+  },
+  "additionalProperties": false
+}
