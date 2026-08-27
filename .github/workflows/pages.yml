@@ -1,14 +1,8 @@
 name: Deploy Kefayat Ω to GitHub Pages
 
+# Deliberately manual until GitHub Pages is enabled in repository settings.
+# This avoids a false deployment signal in normal CI.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'index.html'
-      - 'knowledge/**'
-      - 'governance/**'
-      - 'docs/**'
-      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
