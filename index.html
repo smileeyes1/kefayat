@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#173f35">
+  <title>كفايات Ω — الصفوف ١–٤</title>
+  <style>
+    :root{--bg:#f5f7f4;--card:#fff;--ink:#17211d;--muted:#65716b;--line:#dfe6e1;--accent:#173f35;--accent2:#2f6b57;--warn:#8a5a00;--danger:#9b2c2c;--ok:#236b45;--shadow:0 8px 30px rgba(20,45,35,.08)}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans Arabic",Tahoma,Arial,sans-serif;line-height:1.7}
+    button,input,select{font:inherit} button{cursor:pointer}
+    .top{background:linear-gradient(135deg,#173f35,#285d4b);color:#fff;padding:28px 18px 24px;position:sticky;top:0;z-index:5;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+    .wrap{max-width:1180px;margin:auto;padding:0 18px}.brand{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.brand h1{margin:0;font-size:clamp(24px,4vw,38px)}.brand p{margin:4px 0 0;opacity:.86}
+    .badge{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);padding:7px 11px;border-radius:999px;white-space:nowrap;font-size:13px}
+    .controls{display:grid;grid-template-columns:1.6fr repeat(3,1fr) auto;gap:10px;margin-top:20px}.control{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);min-width:0}.search{width:100%}.clear{border:0;background:#dce9e3;color:var(--accent);font-weight:700}
+    main{padding:24px 0 50px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:13px}
+    .notice{background:#fff8e6;border:1px solid #f0d28a;color:#684800;border-radius:16px;padding:15px 17px;margin-bottom:18px}.notice strong{display:block;margin-bottom:4px}
+    .layout{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}.panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:center}.panel-head h2{font-size:18px;margin:0}.count{color:var(--muted);font-size:13px}
+    .list{display:grid;gap:1px;background:var(--line)}.item{background:#fff;padding:16px 18px;display:flex;justify-content:space-between;gap:14px;align-items:center}.item:hover{background:#fbfdfb}.item h3{margin:0;font-size:16px}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px}.tag{font-size:12px;padding:3px 8px;border-radius:999px;background:#edf3ef;color:#2c594b}.tag.warn{background:#fff3d6;color:#805600}.open{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px 12px;font-weight:700}
+    .viewer{padding:18px;max-height:680px;overflow:auto}.viewer pre{white-space:pre-wrap;word-break:break-word;margin:0;font:14px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace;direction:rtl;text-align:right}.empty{padding:35px 18px;text-align:center;color:var(--muted)}
+    footer{color:var(--muted);text-align:center;padding:20px;font-size:13px}
+    @media(max-width:900px){.controls{grid-template-columns:1fr 1fr}.layout{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:560px){.controls{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.brand{flex-direction:column}.item{align-items:flex-start;flex-direction:column}.open{width:100%}}
+  </style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <div><h1>كفايات Ω</h1><p>قاعدة الكفايات التشغيلية — الصفوف الأول إلى الرابع</p></div>
+      <div class="badge">٢٠٢٦–٢٠٢٧ · USER-PROVIDED WORKING BASELINE</div>
+    </div>
+    <div class="controls">
+      <input id="q" class="control search" placeholder="ابحث في أسماء الملفات والمحتوى…" aria-label="بحث">
+      <select id="grade" class="control"><option value="all">كل الصفوف</option><option value="1">الصف الأول</option><option value="2">الصف الثاني</option><option value="3">الصف الثالث</option><option value="4">الصف الرابع</option></select>
+      <select id="subject" class="control"><option value="all">كل المواد</option><option value="arabic">اللغة العربية</option><option value="math">الرياضيات</option><option value="islamic">التربية الإسلامية</option><option value="nurturing">التنشئة / الوطنية والحياتية</option></select>
+      <select id="source" class="control"><option value="all">كل حالات المصدر</option><option value="working">مرجع عمل</option><option value="official">موثق رسميًا</option></select>
+      <button id="clear" class="control clear">مسح</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="grid" aria-label="ملخص التغطية">
+    <div class="stat"><b id="sFiles">٠</b><span>ملفات المعرفة المسجلة</span></div>
+    <div class="stat"><b id="sGrades">٤</b><span>صفوف مستهدفة</span></div>
+    <div class="stat"><b id="sSubjects">٤</b><span>مجالات/مواد مستهدفة</span></div>
+    <div class="stat"><b id="sStatus">WORKING</b><span>حالة المصدر</span></div>
+  </section>
+
+  <div class="notice"><strong>حارس المصدر</strong> تخزين الملف في GitHub لا يحوله تلقائيًا إلى مصدر رسمي مثبت. التطبيق يميز بين USER-PROVIDED WORKING REFERENCE وOFFICIAL VERIFIED SOURCE، ولا يرفع مستوى الادعاء دون دليل مستقل.</div>
+
+  <section class="layout">
+    <div class="panel">
+      <div class="panel-head"><h2>قاعدة المعرفة</h2><span id="count" class="count"></span></div>
+      <div id="list" class="list"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 id="viewerTitle">المعاينة</h2><span id="viewerStatus" class="count">اختر ملفًا</span></div>
+      <div id="viewer" class="viewer"><div class="empty">اختر ملفًا لعرض محتواه الأصلي دون إعادة صياغة.</div></div>
+    </div>
+  </section>
+</main>
+<footer>كفايات Ω · طبقة العرض لا تستبدل المصدر الأصلي ولا تعدّل نصه.</footer>
+
+<script>
+const FILES = [
+  {id:'ar',subject:'arabic',name:'اللغة العربية — الصفوف ١–٤',path:'GEM_KB_ARABIC_GRADES_1-4.md',grades:['1','2','3','4'],source:'working'},
+  {id:'math',subject:'math',name:'الرياضيات — الصفوف ١–٤',path:'GEM_KB_MATH_GRADES_1-4.md',grades:['1','2','3','4'],source:'working'},
+  {id:'islamic',subject:'islamic',name:'التربية الإسلامية — الصفوف ١–٤',path:'GEM_KB_ISLAMIC_GRADES_1-4.md',grades:['1','2','3','4'],source:'working'},
+  {id:'nurturing',subject:'nurturing',name:'التنشئة — الصفوف ١–٤',path:'GEM_KB_NURTURING_GRADES_1-4.md',grades:['1','2','3','4'],source:'working'},
+  {id:'islamic-gate',subject:'islamic',name:'بوابة أصالة التربية الإسلامية',path:'ISLAMIC_AUTHENTICITY_GATE.md',grades:['1','2','3','4'],source:'working',gate:true},
+  {id:'baseline',subject:'all',name:'حالة Baseline ٢٠٢٦–٢٠٢٧',path:'BASELINE_STATUS_2026-2027.md',grades:['1','2','3','4'],source:'working',gate:true}
+];
+const LABEL={arabic:'لغة عربية',math:'رياضيات',islamic:'تربية إسلامية',nurturing:'تنشئة / وطنية وحياتية',all:'حوكمة'};
+const els={q:document.getElementById('q'),grade:document.getElementById('grade'),subject:document.getElementById('subject'),source:document.getElementById('source'),list:document.getElementById('list'),count:document.getElementById('count'),viewer:document.getElementById('viewer'),viewerTitle:document.getElementById('viewerTitle'),viewerStatus:document.getElementById('viewerStatus')};
+function normalize(s){return (s||'').toLocaleLowerCase('ar').normalize('NFKC')}
+function filtered(){const q=normalize(els.q.value.trim());return FILES.filter(f=>{const grade=els.grade.value==='all'||f.grades.includes(els.grade.value);const subject=els.subject.value==='all'||f.subject===els.subject.value;const source=els.source.value==='all'||f.source===els.source.value;const text=normalize(f.name+' '+f.path+' '+LABEL[f.subject]);return grade&&subject&&source&&(!q||text.includes(q));})}
+function render(){const rows=filtered();els.count.textContent=`${rows.length.toLocaleString('ar-EG')} ملف`;els.list.innerHTML=rows.length?rows.map(f=>`<article class="item"><div><h3>${escapeHtml(f.name)}</h3><div class="meta"><span class="tag">${escapeHtml(LABEL[f.subject])}</span><span class="tag">الصفوف ١–٤</span><span class="tag warn">مرجع عمل</span></div></div><button class="open" data-id="${f.id}">فتح</button></article>`).join(''):'<div class="empty">لا توجد نتائج مطابقة.</div>';els.list.querySelectorAll('.open').forEach(b=>b.addEventListener('click',()=>openFile(b.dataset.id)));}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function openFile(id){const f=FILES.find(x=>x.id===id);if(!f)return;els.viewerTitle.textContent=f.name;els.viewerStatus.textContent='جارٍ التحميل…';els.viewer.innerHTML='<div class="empty">جارٍ تحميل المصدر الأصلي…</div>';try{const r=await fetch(f.path,{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);const text=await r.text();els.viewer.innerHTML=`<pre>${escapeHtml(text)}</pre>`;els.viewerStatus.textContent='ORIGINAL TEXT VIEW';}catch(e){els.viewer.innerHTML=`<div class="empty">تعذر تحميل الملف من مسار التطبيق.<br><small>${escapeHtml(String(e.message||e))}</small></div>`;els.viewerStatus.textContent='LOAD ERROR';}}
+[els.q,els.grade,els.subject,els.source].forEach(x=>x.addEventListener('input',render));document.getElementById('clear').addEventListener('click',()=>{els.q.value='';els.grade.value='all';els.subject.value='all';els.source.value='all';render();});
+document.getElementById('sFiles').textContent=FILES.length.toLocaleString('ar-EG');
+render();
+</script>
+</body>
+</html>
