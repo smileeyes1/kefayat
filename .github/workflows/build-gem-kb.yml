@@ -7,6 +7,7 @@ on:
       - 'GEM_KB_*.md'
       - 'BASELINE_EXTRACTION_STATUS.md'
       - 'raw_sources/**'
+      - 'knowledge/competencies.json'
   workflow_dispatch:
 
 permissions:
@@ -27,17 +28,20 @@ jobs:
       - name: Install parser
         run: pip install python-docx
 
-      - name: Extract and build KBs
+      - name: Build source-preserving knowledge bases
         run: python tools/build_gem_kb.py
+
+      - name: Build structured competency graph input
+        run: python tools/build_competencies.py
 
       - name: Commit generated knowledge bases
         run: |
           git config user.name 'GEM KB Builder'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add GEM_KB_*.md BASELINE_EXTRACTION_STATUS.md raw_sources/
+          git add GEM_KB_*.md BASELINE_EXTRACTION_STATUS.md raw_sources/ knowledge/competencies.json
           if git diff --cached --quiet; then
             echo 'No generated changes.'
             exit 0
           fi
-          git commit -m 'Build full GEM competency knowledge bases [skip ci]'
+          git commit -m 'Build competency knowledge bases and graph input [skip ci]'
           git push
