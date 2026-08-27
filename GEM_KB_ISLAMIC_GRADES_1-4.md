@@ -1,12 +1,13 @@
 # GEM KNOWLEDGE BASE — ISLAMIC — GRADES 1–4
 
-STATUS: GENERATED FROM USER-PROVIDED REFERENCE FILES IN THIS REPOSITORY.
+STATUS: GENERATED FROM USER-PROVIDED REFERENCE MATERIAL.
 SOURCE CLASS: USER-PROVIDED REFERENCE; NOT CLAIMED OFFICIAL-VERIFIED.
 RULE: PRESERVE SOURCE TEXT; NORMALIZATION MUST NOT replace the raw source.
 TRACE: SOURCE → COMPETENCY → LEARNING OUTCOME → OBSERVABLE PERFORMANCE → ACTIVITY → EVIDENCE → ASSESSMENT.
 
 ## الصف 1
 SOURCE: `كفايات التربية الاسلامية ومعاييرها للصف 1. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -48,6 +49,7 @@ SOURCE: `كفايات التربية الاسلامية ومعاييرها لل�
 
 ## الصف 2
 SOURCE: `كفايات التربية الاسلامية ومعاييرها للصف 2. ا.docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -88,6 +90,7 @@ SOURCE: `كفايات التربية الاسلامية ومعاييرها لل�
 
 ## الصف 3
 SOURCE: `كفايات التربية الاسلامية ومعاييرها للصف 3. docx.docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -130,6 +133,7 @@ SOURCE: `كفايات التربية الاسلامية ومعاييرها لل�
 
 ## الصف 4
 SOURCE: `كفايات التربية الاسلامية ومعاييرها للصف 4. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 

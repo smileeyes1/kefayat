@@ -1,15 +1,23 @@
 # GEM KNOWLEDGE BASE — NURTURING — GRADES 1–4
 
-STATUS: GENERATED FROM USER-PROVIDED REFERENCE FILES IN THIS REPOSITORY.
+STATUS: GENERATED FROM USER-PROVIDED REFERENCE MATERIAL.
 SOURCE CLASS: USER-PROVIDED REFERENCE; NOT CLAIMED OFFICIAL-VERIFIED.
 RULE: PRESERVE SOURCE TEXT; NORMALIZATION MUST NOT replace the raw source.
 TRACE: SOURCE → COMPETENCY → LEARNING OUTCOME → OBSERVABLE PERFORMANCE → ACTIVITY → EVIDENCE → ASSESSMENT.
 
 ## الصف 1
+SOURCE: `الكفايات والمعايبر والمؤشرات والقيم علوم وطنية وحياتية  اول (1.docx`
+EXTRACTION ORIGIN: MISSING
+
+### ORIGINAL EXTRACTED TEXT
+
 SOURCE FILE MISSING: `الكفايات والمعايبر والمؤشرات والقيم علوم وطنية وحياتية  اول (1.docx`
+
+---
 
 ## الصف 2
 SOURCE: `الكفايات والمعايبر والمؤشرات والقيم علوم وطنية وحياتية ثاني (1).docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -61,6 +69,7 @@ SOURCE: `الكفايات والمعايبر والمؤشرات والقيم ع�
 
 ## الصف 3
 SOURCE: `كفايات التنشئة ومعاييرها للصف 3. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -149,6 +158,7 @@ SOURCE: `كفايات التنشئة ومعاييرها للصف 3. .docx`
 
 ## الصف 4
 SOURCE: `كفايات التنشئة ومعاييرها للصف 4. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 

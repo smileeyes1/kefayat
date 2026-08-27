@@ -1,12 +1,13 @@
 # GEM KNOWLEDGE BASE — ARABIC — GRADES 1–4
 
-STATUS: GENERATED FROM USER-PROVIDED REFERENCE FILES IN THIS REPOSITORY.
+STATUS: GENERATED FROM USER-PROVIDED REFERENCE MATERIAL.
 SOURCE CLASS: USER-PROVIDED REFERENCE; NOT CLAIMED OFFICIAL-VERIFIED.
 RULE: PRESERVE SOURCE TEXT; NORMALIZATION MUST NOT replace the raw source.
 TRACE: SOURCE → COMPETENCY → LEARNING OUTCOME → OBSERVABLE PERFORMANCE → ACTIVITY → EVIDENCE → ASSESSMENT.
 
 ## الصف 1
 SOURCE: `كفايات اللغة العربية ومعاييرها للصف1. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -56,6 +57,7 @@ SOURCE: `كفايات اللغة العربية ومعاييرها للصف1. .d
 
 ## الصف 2
 SOURCE: `كفايات اللغة العربية ومعاييرها للصف 2..docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -169,6 +171,7 @@ SOURCE: `كفايات اللغة العربية ومعاييرها للصف 2..d
 
 ## الصف 3
 SOURCE: `كفايات اللغة العربية ومعاييرها للصف 3. .docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -253,6 +256,7 @@ SOURCE: `كفايات اللغة العربية ومعاييرها للصف 3. .
 
 ## الصف 4
 SOURCE: `كفايات اللغة العربية ومعاييرها للصف 4..docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 

@@ -1,12 +1,13 @@
 # GEM KNOWLEDGE BASE — MATH — GRADES 1–4
 
-STATUS: GENERATED FROM USER-PROVIDED REFERENCE FILES IN THIS REPOSITORY.
+STATUS: GENERATED FROM USER-PROVIDED REFERENCE MATERIAL.
 SOURCE CLASS: USER-PROVIDED REFERENCE; NOT CLAIMED OFFICIAL-VERIFIED.
 RULE: PRESERVE SOURCE TEXT; NORMALIZATION MUST NOT replace the raw source.
 TRACE: SOURCE → COMPETENCY → LEARNING OUTCOME → OBSERVABLE PERFORMANCE → ACTIVITY → EVIDENCE → ASSESSMENT.
 
 ## الصف 1
 SOURCE: `كفايات الرياضيات ومعاييرها للصف1.docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -115,6 +116,7 @@ SOURCE: `كفايات الرياضيات ومعاييرها للصف1.docx`
 
 ## الصف 2
 SOURCE: `كفايات الرياضيات ومعاييرها للصف 2..docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -260,6 +262,7 @@ SOURCE: `كفايات الرياضيات ومعاييرها للصف 2..docx`
 
 ## الصف 3
 SOURCE: `كفايات الرياضيات ومعاييرها للصف 3.docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
@@ -400,6 +403,7 @@ SOURCE: `كفايات الرياضيات ومعاييرها للصف 3.docx`
 
 ## الصف 4
 SOURCE: `كفايات الرياضيات ومعاييرها للصف 4..docx`
+EXTRACTION ORIGIN: DOCX
 
 ### ORIGINAL EXTRACTED TEXT
 
