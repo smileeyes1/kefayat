@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>كفايات Ω — GEM</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;color:#172033;background:#f5f7fb}*{box-sizing:border-box}body{margin:0}.app{max-width:1100px;margin:auto;padding:24px}.hero,.panel{background:#fff;border:1px solid #dfe5ef;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 5px 20px #1522380d}.hero h1{margin:0 0 8px}.muted{color:#64748b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}label{display:grid;gap:7px;font-weight:700}select,button{font:inherit;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff}button{cursor:pointer;font-weight:800;background:#172033;color:#fff}.status{padding:10px;border-radius:10px;background:#eef2f7}.trace{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.node{padding:12px;border:1px solid #dbe2ec;border-radius:10px;background:#fafbfc;text-align:center}.danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}.ok{background:#ecfdf5;border-color:#a7f3d0;color:#065f46}.rtl-note{font-size:.92rem}.hidden{display:none}@media(max-width:600px){.app{padding:12px}}
+</style>
+</head>
+<body>
+<main class="app">
+<section class="hero">
+<h1>كفايات Ω — GEM</h1>
+<p class="muted">نظام تحويل الكفاية إلى تعلم قابل للتتبع والتحقق.</p>
+<div class="status" id="provenance">جاري تحميل قاعدة المعرفة…</div>
+</section>
+<section class="panel">
+<div class="grid">
+<label>الصف<select id="grade"><option value="1">الأول</option><option value="2">الثاني</option><option value="3">الثالث</option><option value="4">الرابع</option></select></label>
+<label>المادة<select id="subject"><option value="arabic">العربية</option><option value="mathematics">الرياضيات</option><option value="islamic_education">التربية الإسلامية</option><option value="nurturing">التنشئة</option></select></label>
+<label>الكفاية<select id="competency"><option value="">— لا توجد سجلات بعد —</option></select></label>
+</div>
+</section>
+<section class="panel">
+<h2>سلسلة التتبع</h2>
+<div class="trace">
+<div class="node">المصدر</div><div class="node">الكفاية</div><div class="node">نتاج التعلم</div><div class="node">الأداء الملاحظ</div><div class="node">النشاط</div><div class="node">الدليل</div><div class="node">التقييم</div>
+</div>
+<p class="rtl-note muted">لا يُسمح بإصدار ادعاء توافق قبل وجود مسار تتبع فعلي.</p>
+</section>
+<section class="panel">
+<h2>ضمانات أساسية</h2>
+<ul>
+<li>النص الأصلي محفوظ منفصلًا عن التطبيع.</li>
+<li>المصدر المقدم من المستخدم لا يصبح «رسميًا مثبتًا» دون تحقق مستقل.</li>
+<li>الرياضيات تستخدم ترتيبًا بصريًا صريحًا، لا ترتيبًا مستنتجًا من RTL/BiDi.</li>
+<li>الرسوم العددية تخضع لمسار VALUE → REQUIRED COUNT → VISUAL GROUP → ACTUAL COUNT.</li>
+<li>النقص في الدليل لا يتحول إلى نجاح مصطنع.</li>
+</ul>
+</section>
+</main>
+<script>
+const state={records:[]};
+const grade=document.getElementById('grade'),subject=document.getElementById('subject'),competency=document.getElementById('competency'),provenance=document.getElementById('provenance');
+function filter(){const g=Number(grade.value),s=subject.value;const rows=state.records.filter(x=>x.grade===g&&x.subject===s);competency.innerHTML=rows.length?rows.map(x=>`<option value="${escapeHtml(x.id)}">${escapeHtml(x.main_competency||x.id)}</option>`).join(''):'<option value="">— لا توجد سجلات بعد —</option>';}
+function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+async function boot(){try{const r=await fetch('./knowledge/competencies.json',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();state.records=Array.isArray(data.records)?data.records:[];if(data.status==='INCOMPLETE_UNTIL_SOURCE_RECOVERY'){provenance.textContent='حالة قاعدة المعرفة: غير مكتملة حتى استرجاع المصادر الأصلية. لم يتم اختلاق أي كفايات.';provenance.className='status danger'}else{provenance.textContent='قاعدة المعرفة محملة.';provenance.className='status ok'}filter()}catch(e){provenance.textContent='تعذر تحميل قاعدة المعرفة: '+e.message;provenance.className='status danger'}}
+grade.addEventListener('change',filter);subject.addEventListener('change',filter);boot();
+</script>
+</body>
+</html>
