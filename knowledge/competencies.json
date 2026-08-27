@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "status": "INCOMPLETE_UNTIL_SOURCE_RECOVERY",
+  "records": [],
+  "coverage": {
+    "grades": [1,2,3,4],
+    "subjects": ["arabic","mathematics","islamic_education","nurturing"]
+  },
+  "rule": "Do not invent missing competency text. Populate records only from recoverable user-provided source material or independently verified official sources."
+}
