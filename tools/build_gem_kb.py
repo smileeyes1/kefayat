@@ -56,25 +56,31 @@ def extract_docx(path):
     return blocks
 
 
+def get_blocks(subject, grade, filename):
+    docx = ROOT / filename
+    raw = RAW / f"{subject}_grade_{grade}.txt"
+    if docx.exists():
+        blocks = extract_docx(docx)
+        raw.write_text("\n".join(blocks) + "\n", encoding="utf-8")
+        return blocks, "DOCX"
+    if raw.exists():
+        return raw.read_text(encoding="utf-8").splitlines(), "RAW_TEXT"
+    return [f"SOURCE FILE MISSING: `{filename}`"], "MISSING"
+
+
 def build_subject(subject, items):
     out = [
         f"# GEM KNOWLEDGE BASE — {subject.upper()} — GRADES 1–4",
         "",
-        "STATUS: GENERATED FROM USER-PROVIDED REFERENCE FILES IN THIS REPOSITORY.",
+        "STATUS: GENERATED FROM USER-PROVIDED REFERENCE MATERIAL.",
         "SOURCE CLASS: USER-PROVIDED REFERENCE; NOT CLAIMED OFFICIAL-VERIFIED.",
         "RULE: PRESERVE SOURCE TEXT; NORMALIZATION MUST NOT replace the raw source.",
         "TRACE: SOURCE → COMPETENCY → LEARNING OUTCOME → OBSERVABLE PERFORMANCE → ACTIVITY → EVIDENCE → ASSESSMENT.",
         "",
     ]
     for grade, filename in items:
-        path = ROOT / filename
-        if not path.exists():
-            out += [f"## الصف {grade}", f"SOURCE FILE MISSING: `{filename}`", ""]
-            continue
-        blocks = extract_docx(path)
-        raw_name = RAW / f"{subject}_grade_{grade}.txt"
-        raw_name.write_text("\n".join(blocks) + "\n", encoding="utf-8")
-        out += [f"## الصف {grade}", f"SOURCE: `{filename}`", "", "### ORIGINAL EXTRACTED TEXT", ""]
+        blocks, origin = get_blocks(subject, grade, filename)
+        out += [f"## الصف {grade}", f"SOURCE: `{filename}`", f"EXTRACTION ORIGIN: {origin}", "", "### ORIGINAL EXTRACTED TEXT", ""]
         out += blocks
         out += ["", "---", ""]
     return "\n".join(out) + "\n"
@@ -86,8 +92,9 @@ for subject, items in SOURCES.items():
 status = ROOT / "BASELINE_EXTRACTION_STATUS.md"
 status.write_text(
     "# BASELINE EXTRACTION STATUS\n\n"
-    "Generated automatically from the repository DOCX sources.\n\n"
-    "All extracted text is retained under `raw_sources/`; subject KBs retain the extracted text grouped by grade.\n"
-    "The nurturing grade 1–2 files are the repository's `علوم وطنية وحياتية` sources; this mapping is explicitly preserved and must not be presented as independently verified equivalence.\n",
+    "Generated automatically from repository DOCX sources when available, otherwise from previously extracted raw text.\n\n"
+    "All extracted text is retained under `raw_sources/`; subject KBs retain extracted text grouped by grade.\n"
+    "Missing source files are recorded explicitly; the builder never fabricates competency content.\n"
+    "The nurturing grade 1–2 curriculum naming transition is preserved as a source mapping and is not presented as independently verified equivalence.\n",
     encoding="utf-8",
 )
