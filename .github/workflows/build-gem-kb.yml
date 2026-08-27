@@ -1,0 +1,43 @@
+name: Build GEM competency knowledge bases
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'GEM_KB_*.md'
+      - 'BASELINE_EXTRACTION_STATUS.md'
+      - 'raw_sources/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install parser
+        run: pip install python-docx
+
+      - name: Extract and build KBs
+        run: python tools/build_gem_kb.py
+
+      - name: Commit generated knowledge bases
+        run: |
+          git config user.name 'GEM KB Builder'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add GEM_KB_*.md BASELINE_EXTRACTION_STATUS.md raw_sources/
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Build full GEM competency knowledge bases [skip ci]'
+          git push
