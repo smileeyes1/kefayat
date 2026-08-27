@@ -1,0 +1,32 @@
+name: Validate Kefayat Ω
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  structural-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate required files
+        run: |
+          test -f index.html
+          test -f knowledge/competencies.json
+          test -f knowledge/schema/competency.schema.json
+          test -f governance/master-omega.md
+      - name: Validate JSON
+        run: |
+          python - <<'PY'
+          import json
+          for p in ['knowledge/competencies.json','knowledge/schema/competency.schema.json']:
+              with open(p, encoding='utf-8') as f: json.load(f)
+          print('JSON syntax: PASS')
+          PY
+      - name: Check anti-hallucination baseline rules
+        run: |
+          grep -q 'Do not invent missing competency text' knowledge/competencies.json
+          grep -q 'No evidence → no claim' governance/master-omega.md
+          grep -q 'VALUE.*REQUIRED COUNT.*VISUAL GROUP.*ACTUAL COUNT' governance/master-omega.md
+          grep -q 'Mathematical visual order' governance/master-omega.md
+          echo 'Governance invariants: PASS'
