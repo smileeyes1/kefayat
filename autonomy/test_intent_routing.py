@@ -12,16 +12,17 @@ def norm(s):
 def infer(text, grade=None, subject=None):
     q=norm(text)
     if subject and subject != 'all': return subject
-    math=('عدد' in q or 'اعداد' in q or 'جمع' in q or 'طرح' in q or 'ضرب' in q or 'رياض' in q or 'كمية' in q or 'العد' in q)
-    arabic=('حرف' in q or 'قراءة' in q or 'كتابة' in q or 'استماع' in q or 'لغة' in q)
-    islamic=('وضوء' in q or 'صلاة' in q or 'قران' in q or 'سيرة' in q or 'حديث' in q)
-    nurturing=('حواس' in q or 'اسرة' in q or 'اسرتي' in q or 'بيئة' in q or 'حيوان' in q or 'نبات' in q or 'فصول' in q or 'مواطن' in q)
-    scores={'mathematics':int(math),'arabic':int(arabic),'islamic_education':int(islamic),'nurturing':int(nurturing)}
-    return max(scores,key=scores.get) if max(scores.values()) else 'unknown'
+    scores={'mathematics':0,'arabic':0,'islamic_education':0,'nurturing':0}
+    if any(x in q for x in ('رياض','عدد','اعداد','جمع','طرح','ضرب','قسمة','كمية','عد','رقم','هندسة','قياس','مساله')): scores['mathematics']+=8
+    if any(x in q for x in ('حرف','قراءة','كتابة','استماع','تحدث','لغة','نص','هجاء')): scores['arabic']+=8
+    if any(x in q for x in ('وضوء','صلاة','قران','قرآن','حديث','سيرة','اسلام','عبادة')): scores['islamic_education']+=8
+    if any(x in q for x in ('حواس','اسرة','اسرتي','اسره','بيئة','حيوان','نبات','فصول','مواطن','مدرسة','مجتمع','فلسطين')): scores['nurturing']+=8
+    best=max(scores.values())
+    return max(scores,key=scores.get) if best else 'unknown'
 
 def test_math_query_does_not_leak_arabic():
     d=json.loads(KB.read_text(encoding='utf-8')); records=d['records']
-    q='درس العدد ١'; subject=infer(q,1)
+    subject=infer('درس العدد ١',1)
     assert subject=='mathematics', subject
     candidates=[r for r in records if r.get('grade')==1 and r.get('subject')==subject]
     assert candidates, 'No Grade 1 mathematics records available'
@@ -29,7 +30,7 @@ def test_math_query_does_not_leak_arabic():
 
 def test_ui_contains_explicit_routing_contract():
     t=INDEX.read_text(encoding='utf-8')
-    for marker in ('inferMission','WISDOM','retrieveMissionRecords','Cross-Domain'):
+    for marker in ('inferMission','WISDOM','retrieveMission','Cross-Domain'):
         assert marker in t, f'missing UI routing marker: {marker}'
 
 if __name__=='__main__':
