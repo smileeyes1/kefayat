@@ -22,6 +22,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Run autonomy regression tests
+        run: python3 autonomy/test_controller.py
+
       - name: Run autonomous controller
         run: python3 autonomy/controller.py
 
