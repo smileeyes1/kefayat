@@ -12,12 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Validate required files
         run: |
           test -f index.html
           test -f knowledge/competencies.json
           test -f knowledge/schema/competency.schema.json
           test -f governance/master-omega.md
+          test -f tools/build_competencies.py
+
       - name: Validate JSON
         run: |
           python - <<'PY'
@@ -26,31 +29,49 @@ jobs:
               with open(p, encoding='utf-8') as f: json.load(f)
           print('JSON syntax: PASS')
           PY
+
       - name: Validate competency records
         run: |
           python - <<'PY'
           import json, re
           data=json.load(open('knowledge/competencies.json',encoding='utf-8'))
-          assert isinstance(data,list), 'competencies.json must be an array'
+          assert isinstance(data,dict), 'competencies.json must be an object'
+          records=data.get('records')
+          coverage=data.get('coverage')
+          assert isinstance(records,list), 'records must be an array'
+          assert isinstance(coverage,list), 'coverage must be an array'
           ids=set()
           allowed_grades={1,2,3,4}
           allowed_subjects={'arabic','mathematics','islamic_education','nurturing'}
-          for i,r in enumerate(data):
+          for i,r in enumerate(records):
               assert isinstance(r,dict), f'record {i} is not an object'
               for k in ('id','grade','subject','provenance','source_text'): assert k in r, f'record {i} missing {k}'
-              assert re.fullmatch(r'G[1-4]-[A-Z]+-[0-9]{3,}',r['id']), f"bad id: {r['id']}"
+              assert re.fullmatch(r'G[1-4]-[A-Z_]+-[0-9]{4}',r['id']), f"bad id: {r['id']}"
               assert r['id'] not in ids, f"duplicate id: {r['id']}"
               ids.add(r['id'])
               assert r['grade'] in allowed_grades, f"bad grade: {r['grade']}"
               assert r['subject'] in allowed_subjects, f"bad subject: {r['subject']}"
               assert isinstance(r['source_text'],str) and r['source_text'].strip(), f"empty source_text: {r['id']}"
-              assert isinstance(r['provenance'],dict) and 'status' in r['provenance'], f"bad provenance: {r['id']}"
-          print(f'Competency records: PASS ({len(data)} records)')
+              assert isinstance(r['provenance'],dict) and r['provenance'].get('status'), f"bad provenance: {r['id']}"
+          assert len(records) > 0, 'no competency records generated'
+          print(f'Competency records: PASS ({len(records)} records)')
+          print(f'Coverage entries: {len(coverage)}')
           PY
+
+      - name: Validate source coverage and no invented grade-1 nurturing source
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open('knowledge/competencies.json',encoding='utf-8'))
+          c={(x['grade'],x['subject']):x for x in d['coverage']}
+          assert c[(1,'nurturing')]['status']=='MISSING_SOURCE'
+          print('Source coverage guard: PASS')
+          PY
+
       - name: Check anti-hallucination baseline rules
         run: |
-          grep -q 'Do not invent missing competency text' governance/master-omega.md
-          grep -q 'No evidence → no claim' governance/master-omega.md
-          grep -q 'VALUE.*REQUIRED COUNT.*VISUAL GROUP.*ACTUAL COUNT' governance/master-omega.md
-          grep -q 'Mathematical visual order' governance/master-omega.md
+          grep -qi 'Do not invent missing competency text' governance/master-omega.md
+          grep -qi 'No evidence.*no claim' governance/master-omega.md
+          grep -qi 'VALUE.*REQUIRED COUNT.*VISUAL GROUP.*ACTUAL COUNT' governance/master-omega.md
+          grep -qi 'Mathematical visual order' governance/master-omega.md
           echo 'Governance invariants: PASS'
