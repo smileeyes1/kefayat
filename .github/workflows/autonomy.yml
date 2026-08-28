@@ -1,0 +1,38 @@
+name: Kefayat Ω Autonomous Control Loop
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: kefayat-autonomy
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  control-loop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout mission state
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run autonomous controller
+        run: python3 autonomy/controller.py
+
+      - name: Persist checkpoint and evidence
+        run: |
+          git config user.name 'kefayat-autonomy[bot]'
+          git config user.email 'kefayat-autonomy[bot]@users.noreply.github.com'
+          git add autonomy/mission-state.json autonomy/evidence-ledger.jsonl
+          if git diff --cached --quiet; then
+            echo 'No state change; no commit required.'
+          else
+            git commit -m 'chore(autonomy): persist mission checkpoint'
+            git push
+          fi
