@@ -1,0 +1,18 @@
+{
+  "mission_id": "KEFAYAT-AUTO-001",
+  "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
+  "phase": "BOOT",
+  "status": "IDLE",
+  "completed_tasks": [],
+  "open_gaps": ["AUTONOMY_RUNTIME_ASSURANCE", "RELEASE_GATE_EVIDENCE"],
+  "blockers": [],
+  "attempt_counters": {},
+  "stagnant_cycles": 0,
+  "last_checkpoint": null,
+  "artifact_identities": {},
+  "evidence_state": "UNREPORTED",
+  "claim_state": "NO CLAIM",
+  "release_state": "NOT READY",
+  "next_best_action": "BOOTSTRAP",
+  "history": []
+}
