@@ -38,6 +38,9 @@ jobs:
       - name: Run Wisdom Ω governance regression
         run: python3 autonomy/test_wisdom_governance.py
 
+      - name: Run continuity runner regression
+        run: python3 quality/test_continuity_runner.py
+
       - name: Run production contract regression
         run: python3 quality/test_production_contract.py
 
