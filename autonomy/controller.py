@@ -1,219 +1,68 @@
 #!/usr/bin/env python3
-"""Kefayat Ω autonomous control plane.
-
-Deterministic, stdlib-only orchestration. This layer does not call an LLM.
-It manages durable state, bounded continuation, evidence records, and a
-conservative release gate. It never converts absence of evidence into proof.
-"""
+"""Kefayat Ω bounded autonomous control plane."""
 from __future__ import annotations
-import hashlib
-import json
-import os
-import time
+import hashlib, json, os, time
 from pathlib import Path
 from typing import Any
-
-ROOT = Path(os.environ.get("KEFAYAT_ROOT", str(Path(__file__).resolve().parents[1]))).resolve()
-AUTO = ROOT / "autonomy"
-STATE = AUTO / "mission-state.json"
-LEDGER = AUTO / "evidence-ledger.jsonl"
-KB = ROOT / "knowledge" / "competencies.json"
-MAX_STAGNANT_CYCLES = 3
-ALLOWED_GRADES = {1, 2, 3, 4}
-ALLOWED_SUBJECTS = {"arabic", "mathematics", "islamic_education", "nurturing"}
-
-
-def digest(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1024 * 1024), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def default_state() -> dict[str, Any]:
-    return {
-        "mission_id": "KEFAYAT-AUTO-001",
-        "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
-        "phase": "BOOT",
-        "status": "RUNNING",
-        "completed_tasks": [],
-        "open_gaps": [],
-        "blockers": [],
-        "attempt_counters": {},
-        "stagnant_cycles": 0,
-        "last_checkpoint": None,
-        "artifact_identities": {},
-        "evidence_state": "UNREPORTED",
-        "claim_state": "NO CLAIM",
-        "release_state": "NOT READY",
-        "next_best_action": "BOOTSTRAP",
-        "history": [],
-    }
-
-
-def load_state() -> dict[str, Any]:
-    if not STATE.exists():
-        return default_state()
-    try:
-        state = json.loads(STATE.read_text(encoding="utf-8"))
-        assert isinstance(state, dict)
-        return state
-    except Exception:
-        state = default_state()
-        state["status"] = "BLOCKED"
-        state["blockers"] = ["STATE_CORRUPT"]
-        return state
-
-
-def save_state(state: dict[str, Any]) -> None:
-    AUTO.mkdir(parents=True, exist_ok=True)
-    tmp = STATE.with_suffix(".tmp")
-    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    os.replace(tmp, STATE)
-
-
-def record(state: dict[str, Any], test_id: str, expected: str, observed: str,
-           decision: str, method: str) -> None:
-    AUTO.mkdir(parents=True, exist_ok=True)
-    entry = {
-        "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "mission_id": state["mission_id"],
-        "test_id": test_id,
-        "expected": expected,
-        "observed": observed,
-        "method": method,
-        "decision": decision,
-    }
-    with LEDGER.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-
-
-def validate_kb(state: dict[str, Any]) -> bool:
-    if not KB.exists():
-        state["blockers"] = [x for x in state["blockers"] if x != "KB_MISSING"] + ["KB_MISSING"]
-        record(state, "AUTO-KB-01", "canonical KB exists", "missing", "BLOCKED", "filesystem")
-        return False
-    try:
-        data = json.loads(KB.read_text(encoding="utf-8"))
-        assert isinstance(data, dict), "KB root must be an object"
-        records = data.get("records")
-        coverage = data.get("coverage")
-        assert isinstance(records, list), "records must be an array"
-        assert isinstance(coverage, list), "coverage must be an array"
-        ids: set[str] = set()
-        for i, r in enumerate(records):
-            assert isinstance(r, dict), f"record {i} is not an object"
-            for k in ("id", "grade", "subject", "provenance", "source_text"):
-                assert k in r, f"record {i} missing {k}"
-            assert r["id"] not in ids, f"duplicate id: {r['id']}"
-            ids.add(r["id"])
-            assert r["grade"] in ALLOWED_GRADES, f"bad grade: {r['grade']}"
-            assert r["subject"] in ALLOWED_SUBJECTS, f"bad subject: {r['subject']}"
-            assert isinstance(r["source_text"], str) and r["source_text"].strip(), f"empty source_text: {r['id']}"
-            assert isinstance(r["provenance"], dict) and r["provenance"].get("status"), f"bad provenance: {r['id']}"
-        assert records, "no competency records generated"
-        state["artifact_identities"]["competencies.json"] = digest(KB)
-        record(state, "AUTO-KB-01", "valid canonical competency records", f"{len(records)} records; {len(coverage)} coverage entries", "PASS", "stdlib JSON + invariant checks")
-        return True
-    except Exception as e:
-        state["blockers"] = [x for x in state["blockers"] if not x.startswith("KB_INVALID:")] + [f"KB_INVALID:{type(e).__name__}"]
-        record(state, "AUTO-KB-01", "valid canonical competency records", str(e), "NO-GO", "stdlib invariant checks")
-        return False
-
-
-def check_state_integrity(state: dict[str, Any]) -> bool:
-    required = ("mission_id", "baseline_id", "phase", "status", "completed_tasks",
-                "blockers", "next_best_action", "artifact_identities", "evidence_state",
-                "claim_state", "release_state")
-    missing = [k for k in required if k not in state]
-    if missing:
-        record(state, "AUTO-STATE-01", "required durable state", str(missing), "BLOCKED", "schema invariant check")
-        return False
-    record(state, "AUTO-STATE-01", "required durable state", "complete", "PASS", "schema invariant check")
-    return True
-
-
-def choose_next(state: dict[str, Any]) -> str:
-    if state.get("status") in {"BLOCKED", "SAFE_STOP", "NO-GO"}:
-        return "RECOVER_OR_ESCALATE"
-    if "KB_VALIDATED" not in state["completed_tasks"]:
-        return "VALIDATE_KB"
-    if "STATE_INTEGRITY_CHECKED" not in state["completed_tasks"]:
-        return "CHECK_STATE_INTEGRITY"
-    if "RELEASE_GATE_CHECKED" not in state["completed_tasks"]:
-        return "CHECK_RELEASE_GATE"
-    return "WAIT_FOR_NEXT_MISSION"
-
-
-def progress_signature(state: dict[str, Any]) -> str:
-    """Return state that represents substantive progress, excluding timestamps/history."""
-    material = {
-        "phase": state.get("phase"),
-        "status": state.get("status"),
-        "completed_tasks": state.get("completed_tasks", []),
-        "open_gaps": state.get("open_gaps", []),
-        "blockers": state.get("blockers", []),
-        "attempt_counters": state.get("attempt_counters", {}),
-        "artifact_identities": state.get("artifact_identities", {}),
-        "evidence_state": state.get("evidence_state"),
-        "claim_state": state.get("claim_state"),
-        "release_state": state.get("release_state"),
-        "next_best_action": state.get("next_best_action"),
-    }
-    return json.dumps(material, sort_keys=True, ensure_ascii=False)
-
-
-def main() -> int:
-    state = load_state()
-    state["phase"] = "CONTROL_LOOP"
-    if state.get("status") not in {"BLOCKED", "SAFE_STOP", "NO-GO"}:
-        state["status"] = "RUNNING"
-
-    before_signature = progress_signature(state)
-    action = choose_next(state)
-    state["next_best_action"] = action
-
-    if action == "VALIDATE_KB":
-        if validate_kb(state):
-            if "KB_VALIDATED" not in state["completed_tasks"]:
-                state["completed_tasks"].append("KB_VALIDATED")
-            state["phase"] = "VERIFY"
-        else:
-            state["status"] = "BLOCKED"
-    elif action == "CHECK_STATE_INTEGRITY":
-        if check_state_integrity(state):
-            if "STATE_INTEGRITY_CHECKED" not in state["completed_tasks"]:
-                state["completed_tasks"].append("STATE_INTEGRITY_CHECKED")
-        else:
-            state["status"] = "BLOCKED"
-    elif action == "CHECK_RELEASE_GATE":
-        state["release_state"] = "NOT READY"
-        state["claim_state"] = "NO CLAIM"
-        record(state, "AUTO-RELEASE-01", "release gates proven", "autonomous runtime assurance not yet proven", "BLOCKED", "claim-scope gate")
-        if "RELEASE_GATE_CHECKED" not in state["completed_tasks"]:
-            state["completed_tasks"].append("RELEASE_GATE_CHECKED")
-    elif action == "RECOVER_OR_ESCALATE":
-        record(state, "AUTO-RECOVERY-01", "safe recovery or explicit escalation", state.get("status", "UNKNOWN"), "BLOCKED", "conservative recovery gate")
-
-    after_signature = progress_signature(state)
-    if before_signature == after_signature:
-        state["stagnant_cycles"] = int(state.get("stagnant_cycles", 0)) + 1
-    else:
-        state["stagnant_cycles"] = 0
-
-    if state["stagnant_cycles"] >= MAX_STAGNANT_CYCLES and state["status"] == "RUNNING":
-        state["status"] = "SAFE_STOP"
-        state["blockers"] = [x for x in state["blockers"] if x != "STAGNATION_DETECTED"] + ["STAGNATION_DETECTED"]
-        record(state, "AUTO-WATCHDOG-01", "progress or bounded stop", "stagnation", "SAFE_STOP", "progress watchdog")
-
-    state["last_checkpoint"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    state["history"].append({"action": action, "status": state["status"], "checkpoint": state["last_checkpoint"]})
-    save_state(state)
-    print(json.dumps({"mission_id": state["mission_id"], "action": action,
-                      "status": state["status"], "next": choose_next(state)}, ensure_ascii=False))
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+ROOT=Path(os.environ.get("KEFAYAT_ROOT",str(Path(__file__).resolve().parents[1]))).resolve(); AUTO=ROOT/"autonomy"
+STATE=AUTO/"mission-state.json"; LEDGER=AUTO/"evidence-ledger.jsonl"; PLAN=AUTO/"mission-plan.json"; KB=ROOT/"knowledge"/"competencies.json"
+MAX_STAGNANT_CYCLES=3; ALLOWED_GRADES={1,2,3,4}; ALLOWED_SUBJECTS={"arabic","mathematics","islamic_education","nurturing"}
+def digest(p:Path)->str:
+ h=hashlib.sha256();
+ with p.open("rb") as f:
+  for c in iter(lambda:f.read(1024*1024),b""): h.update(c)
+ return h.hexdigest()
+def default_state()->dict[str,Any]: return {"mission_id":"KEFAYAT-PRO-001","baseline_id":"MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01","phase":"BOOT","status":"RUNNING","completed_tasks":[],"open_gaps":["FULL_AUTONOMOUS_DEVELOPMENT","REAL_MISSION_PILOT"],"blockers":[],"attempt_counters":{},"stagnant_cycles":0,"last_checkpoint":None,"artifact_identities":{},"evidence_state":"UNREPORTED","claim_state":"NO CLAIM","release_state":"NOT READY","next_best_action":"BOOTSTRAP","history":[]}
+def load_state()->dict[str,Any]:
+ if not STATE.exists(): return default_state()
+ try:
+  s=json.loads(STATE.read_text(encoding="utf-8")); assert isinstance(s,dict); return s
+ except Exception:
+  s=default_state(); s["status"]="BLOCKED"; s["blockers"]=["STATE_CORRUPT"]; return s
+def save_state(s:dict[str,Any])->None:
+ AUTO.mkdir(parents=True,exist_ok=True); t=STATE.with_suffix(".tmp"); t.write_text(json.dumps(s,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); os.replace(t,STATE)
+def record(s:dict[str,Any],tid:str,expected:str,observed:str,decision:str,method:str)->None:
+ AUTO.mkdir(parents=True,exist_ok=True); e={"timestamp_utc":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),"mission_id":s["mission_id"],"test_id":tid,"expected":expected,"observed":observed,"method":method,"decision":decision}; LEDGER.open("a",encoding="utf-8").write(json.dumps(e,ensure_ascii=False)+"\n")
+def validate_plan(s:dict[str,Any])->bool:
+ try:
+  d=json.loads(PLAN.read_text(encoding="utf-8")); assert d["mission_id"]==s["mission_id"]; assert d["baseline_id"]==s["baseline_id"]; assert isinstance(d["phases"],list) and len(d["phases"])>=6; assert isinstance(d["gates"],dict) and len(d["gates"])>=6; assert d["stop_conditions"]; record(s,"AUTO-PLAN-01","bounded mission plan is valid","valid","PASS","JSON + invariant checks"); return True
+ except Exception as e: s["blockers"]=[x for x in s["blockers"] if not x.startswith("PLAN_INVALID")]+[f"PLAN_INVALID:{type(e).__name__}"]; record(s,"AUTO-PLAN-01","bounded mission plan is valid",str(e),"NO-GO","mission-plan invariant checks"); return False
+def validate_kb(s:dict[str,Any])->bool:
+ if not KB.exists(): record(s,"AUTO-KB-01","canonical KB exists","missing","BLOCKED","filesystem"); s["blockers"].append("KB_MISSING"); return False
+ try:
+  d=json.loads(KB.read_text(encoding="utf-8")); assert isinstance(d,dict); rs,cv=d.get("records"),d.get("coverage"); assert isinstance(rs,list) and isinstance(cv,list) and rs; ids=set()
+  for i,r in enumerate(rs):
+   assert isinstance(r,dict)
+   for k in ("id","grade","subject","provenance","source_text"): assert k in r
+   assert r["id"] not in ids; ids.add(r["id"]); assert r["grade"] in ALLOWED_GRADES; assert r["subject"] in ALLOWED_SUBJECTS; assert isinstance(r["source_text"],str) and r["source_text"].strip(); assert isinstance(r["provenance"],dict) and r["provenance"].get("status")
+  s["artifact_identities"]["competencies.json"]=digest(KB); record(s,"AUTO-KB-01","valid canonical competency records",f"{len(rs)} records; {len(cv)} coverage entries","PASS","JSON + invariants"); return True
+ except Exception as e: record(s,"AUTO-KB-01","valid canonical competency records",str(e),"NO-GO","invariant checks"); return False
+def check_state(s:dict[str,Any])->bool:
+ req=("mission_id","baseline_id","phase","status","completed_tasks","blockers","next_best_action","artifact_identities","evidence_state","claim_state","release_state"); missing=[k for k in req if k not in s]; record(s,"AUTO-STATE-01","required durable state","complete" if not missing else str(missing),"PASS" if not missing else "BLOCKED","schema invariant check"); return not missing
+def choose_next(s:dict[str,Any])->str:
+ if s.get("status") in {"BLOCKED","SAFE_STOP","NO-GO"}: return "RECOVER_OR_ESCALATE"
+ t=s["completed_tasks"]
+ if "PLAN_VALIDATED" not in t:return "VALIDATE_PLAN"
+ if "KB_VALIDATED" not in t:return "VALIDATE_KB"
+ if "STATE_INTEGRITY_CHECKED" not in t:return "CHECK_STATE_INTEGRITY"
+ if "RELEASE_GATE_CHECKED" not in t:return "CHECK_RELEASE_GATE"
+ return "WAIT_FOR_NEXT_MISSION"
+def sig(s:dict[str,Any])->str: return json.dumps({k:s.get(k) for k in ("phase","status","completed_tasks","open_gaps","blockers","attempt_counters","artifact_identities","evidence_state","claim_state","release_state","next_best_action")},sort_keys=True,ensure_ascii=False)
+def main()->int:
+ s=load_state(); s["phase"]="CONTROL_LOOP"; s["status"]="RUNNING" if s.get("status") not in {"BLOCKED","SAFE_STOP","NO-GO"} else s["status"]; before=sig(s); a=choose_next(s); s["next_best_action"]=a
+ if a=="VALIDATE_PLAN":
+  if validate_plan(s): s["completed_tasks"].append("PLAN_VALIDATED")
+  else:s["status"]="NO-GO"
+ elif a=="VALIDATE_KB":
+  if validate_kb(s): s["completed_tasks"].append("KB_VALIDATED"); s["phase"]="VERIFY"
+  else:s["status"]="BLOCKED"
+ elif a=="CHECK_STATE_INTEGRITY":
+  if check_state(s): s["completed_tasks"].append("STATE_INTEGRITY_CHECKED")
+  else:s["status"]="BLOCKED"
+ elif a=="CHECK_RELEASE_GATE":
+  s["release_state"]="NOT READY"; s["claim_state"]="NO CLAIM"; record(s,"AUTO-RELEASE-01","release gates proven","full autonomous development and real-mission assurance not proven","BLOCKED","claim-scope gate"); s["completed_tasks"].append("RELEASE_GATE_CHECKED")
+ elif a=="RECOVER_OR_ESCALATE": record(s,"AUTO-RECOVERY-01","safe recovery or explicit escalation",s.get("status","UNKNOWN"),"BLOCKED","conservative recovery gate")
+ after=sig(s); s["stagnant_cycles"]=int(s.get("stagnant_cycles",0))+1 if before==after else 0
+ if s["stagnant_cycles"]>=MAX_STAGNANT_CYCLES and s["status"]=="RUNNING": s["status"]="SAFE_STOP"; s["blockers"]=[x for x in s["blockers"] if x!="STAGNATION_DETECTED"]+["STAGNATION_DETECTED"]; record(s,"AUTO-WATCHDOG-01","progress or bounded stop","stagnation","SAFE_STOP","progress watchdog")
+ s["last_checkpoint"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()); s["history"].append({"action":a,"status":s["status"],"checkpoint":s["last_checkpoint"]}); save_state(s); print(json.dumps({"mission_id":s["mission_id"],"action":a,"status":s["status"],"next":choose_next(s)},ensure_ascii=False)); return 0
+if __name__=="__main__": raise SystemExit(main())
