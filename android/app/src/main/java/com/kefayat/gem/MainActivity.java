@@ -20,10 +20,12 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
         s.setAllowContentAccess(true);
+        s.setBuiltInZoomControls(false);
+        s.setDisplayZoomControls(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         web.setWebViewClient(new WebViewClient());
         setContentView(web);
-        web.loadUrl("file:///android_asset/ai.html");
+        web.loadUrl("file:///android_asset/index.html");
     }
 
     @Override public void onBackPressed() {
