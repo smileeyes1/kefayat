@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'ai.html'
       - 'sw.js'
       - 'manifest.webmanifest'
       - 'knowledge/**'
