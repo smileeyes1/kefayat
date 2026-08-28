@@ -1,0 +1,28 @@
+name: Resilience Tests
+
+on:
+  push:
+    paths:
+      - 'runtime/**'
+      - '.github/workflows/resilience-tests.yml'
+  pull_request:
+    paths:
+      - 'runtime/**'
+      - '.github/workflows/resilience-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run resilience regression
+        working-directory: runtime
+        run: python -m unittest discover -s . -p 'test_*.py' -v
