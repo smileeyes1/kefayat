@@ -26,6 +26,21 @@ REQUIRED_FILES = [
     ".github/workflows/pages.yml",
 ]
 
+# Scan product/governance content for unsupported claims. Do not scan this
+# validator's own regex definitions, which necessarily contain the patterns
+# it is designed to detect.
+CLAIM_SCAN_FILES = [
+    "README.md",
+    "index.html",
+    "manifest.webmanifest",
+    "governance/WISDOM_GOVERNANCE.md",
+    "governance/CONTINUITY_AND_COMPLETION_CONTRACT.md",
+    "governance/PROFESSIONAL_RELEASE_STANDARD.md",
+    "autonomy/controller.py",
+    ".github/workflows/autonomy-regression.yml",
+    ".github/workflows/pages.yml",
+]
+
 FORBIDDEN_PATTERNS = [
     re.compile(r"(?i)universally\s+correct"),
     re.compile(r"(?i)100%\s+(?:correct|guaranteed|error[- ]free)"),
@@ -71,7 +86,7 @@ def main() -> None:
     for marker in ("test_go_gate.py", "test_professional_release.py", "test_intent_routing.py", "test_wisdom_governance.py"):
         assert marker in workflow, f"CI gate missing: {marker}"
 
-    combined = "\n".join(read(p) for p in REQUIRED_FILES)
+    combined = "\n".join(read(p) for p in CLAIM_SCAN_FILES)
     hits = [p.pattern for p in FORBIDDEN_PATTERNS if p.search(combined)]
     assert not hits, f"unsupported production claim detected: {hits}"
 
