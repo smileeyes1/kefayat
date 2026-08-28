@@ -24,7 +24,7 @@ A level must never be claimed unless its evidence exists.
 - Prefer deterministic/local processing when it provides the required result; use AI when it adds material value.
 - No secret, credential, or privileged token is committed to the repository.
 - Release artifacts are reproducible from the system of record.
-- Production claims are scoped; no claim of universal correctness or unlimited availability is permitted.
+- Production claims are scoped; no absolute-correctness or unlimited-service claim is permitted.
 
 ## Critical acceptance gates
 ### Knowledge
@@ -68,4 +68,4 @@ A level must never be claimed unless its evidence exists.
 Otherwise the status is **NO-GO** or **CONDITIONAL GO**, with the missing evidence explicitly stated.
 
 ## What GO does not mean
-GO does not mean perfect, universally correct, unlimited, or permanently failure-free. It means the release candidate is professionally acceptable for the explicitly declared scope, with no known critical blocker and with evidence supporting the claims made about it.
+GO does not mean perfect, infallible, universally applicable, or permanently failure-free. It means the release candidate is professionally acceptable for the explicitly declared scope, with no known critical blocker and with evidence supporting the claims made about it.
