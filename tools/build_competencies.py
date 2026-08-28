@@ -42,25 +42,29 @@ def parse_file(path, grade, subject):
         if " | " not in line:
             continue
         cells = [clean(x) for x in line.split(" | ")]
-        # Supported source shapes:
-        # 7+ cells: domain, main, sub, criterion, outcomes, mastery x3, optional values.
-        # 6 cells (Islamic Education): main, sub, criterion, mastery x3.
+
+        # Source schemas are not assumed identical across subjects.
+        # Islamic: main | sub | criterion | proficient | developing | attempting.
         if subject == "islamic_education" and len(cells) >= 6:
             if cells[0] in {"الكفايات الرئيسة", "المجال"}:
                 continue
             domain, main, sub, criterion = None, cells[0], cells[1], cells[2]
-            mastery = {"يتقن": cells[3], "يطور": cells[4], "يحاول": cells[5]}
             outcome = None
+            mastery = {"يتقن": cells[3], "يطور": cells[4], "يحاول": cells[5]}
         else:
             if len(cells) < 7:
                 continue
             if cells[0] in {"المجال", "المجال المعرفي"} or cells[3] in {"المعايير", "المعيار"}:
                 continue
             domain, main, sub, criterion = cells[0], cells[1], cells[2], cells[3]
-            # For standard 7-column sources, cells 4+ contain outcome/mastery/values.
-            # Keep the original row untouched for traceability.
-            outcome = cells[4] if len(cells) >= 8 else None
-            mastery = {"يتقن": cells[-3], "يطور": cells[-2], "يحاول": cells[-1]}
+            if len(cells) == 7:
+                # Arabic-like schema: domain | main | sub | criterion | proficient | developing | attempting
+                outcome = None
+                mastery = {"يتقن": cells[4], "يطور": cells[5], "يحاول": cells[6]}
+            else:
+                # Math/nurturing-like schema: domain | main | sub | criterion | outcome | proficient | developing | attempting | optional values...
+                outcome = cells[4] or None
+                mastery = {"يتقن": cells[5], "يطور": cells[6], "يحاول": cells[7]}
 
         rec = {
             "id": stable_id(grade, subject, len(records) + 1),
@@ -98,11 +102,11 @@ for subject, grades in FILES.items():
 status = "COMPLETE_STRUCTURAL_PARSE" if all(x["status"] == "PARSED" for x in coverage) else "INCOMPLETE_SOURCE_COVERAGE"
 OUT.parent.mkdir(exist_ok=True)
 OUT.write_text(json.dumps({
-    "schema_version": "1.2.0",
+    "schema_version": "1.3.0",
     "status": status,
     "provenance_policy": "USER-PROVIDED REFERENCE unless independently verified",
     "records": records,
     "coverage": coverage,
-    "rule": "No missing competency text is invented. Source text is preserved per record; normalization is separate."
+    "rule": "No missing competency text is invented. Source text is preserved per record; normalization is separate. Subject-specific source schemas are parsed explicitly."
 }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Generated {len(records)} structured records; status={status}")
