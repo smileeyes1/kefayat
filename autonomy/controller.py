@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("KEFAYAT_ROOT", str(Path(__file__).resolve().parents[1]))).resolve()
 AUTO = ROOT / "autonomy"
 STATE = AUTO / "mission-state.json"
 LEDGER = AUTO / "evidence-ledger.jsonl"
@@ -146,13 +146,31 @@ def choose_next(state: dict[str, Any]) -> str:
     return "WAIT_FOR_NEXT_MISSION"
 
 
+def progress_signature(state: dict[str, Any]) -> str:
+    """Return state that represents substantive progress, excluding timestamps/history."""
+    material = {
+        "phase": state.get("phase"),
+        "status": state.get("status"),
+        "completed_tasks": state.get("completed_tasks", []),
+        "open_gaps": state.get("open_gaps", []),
+        "blockers": state.get("blockers", []),
+        "attempt_counters": state.get("attempt_counters", {}),
+        "artifact_identities": state.get("artifact_identities", {}),
+        "evidence_state": state.get("evidence_state"),
+        "claim_state": state.get("claim_state"),
+        "release_state": state.get("release_state"),
+        "next_best_action": state.get("next_best_action"),
+    }
+    return json.dumps(material, sort_keys=True, ensure_ascii=False)
+
+
 def main() -> int:
     state = load_state()
     state["phase"] = "CONTROL_LOOP"
     if state.get("status") not in {"BLOCKED", "SAFE_STOP", "NO-GO"}:
         state["status"] = "RUNNING"
 
-    before = json.dumps(state, sort_keys=True, ensure_ascii=False)
+    before_signature = progress_signature(state)
     action = choose_next(state)
     state["next_best_action"] = action
 
@@ -178,8 +196,8 @@ def main() -> int:
     elif action == "RECOVER_OR_ESCALATE":
         record(state, "AUTO-RECOVERY-01", "safe recovery or explicit escalation", state.get("status", "UNKNOWN"), "BLOCKED", "conservative recovery gate")
 
-    after = json.dumps(state, sort_keys=True, ensure_ascii=False)
-    if before == after:
+    after_signature = progress_signature(state)
+    if before_signature == after_signature:
         state["stagnant_cycles"] = int(state.get("stagnant_cycles", 0)) + 1
     else:
         state["stagnant_cycles"] = 0
