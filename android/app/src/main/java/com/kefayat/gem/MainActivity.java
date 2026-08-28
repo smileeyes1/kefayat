@@ -23,7 +23,7 @@ public class MainActivity extends Activity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         web.setWebViewClient(new WebViewClient());
         setContentView(web);
-        web.loadUrl("file:///android_asset/index.html");
+        web.loadUrl("file:///android_asset/ai.html");
     }
 
     @Override public void onBackPressed() {
