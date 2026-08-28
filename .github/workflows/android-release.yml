@@ -20,14 +20,14 @@ jobs:
           python-version: '3.12'
       - name: Build competency graph
         run: python tools/build_competencies.py
-      - name: Stage offline web application
+      - name: Stage production workspace
         run: |
           mkdir -p android/app/src/main/assets/knowledge
           cp index.html ai.html sw.js manifest.webmanifest android/app/src/main/assets/
           cp knowledge/competencies.json android/app/src/main/assets/knowledge/
       - uses: android-actions/setup-android@v3
-      - name: Install SDK
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Install Android SDK 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10'
@@ -47,13 +47,13 @@ jobs:
           test -n "$KEY_ALIAS"
           test -n "$KEY_PASSWORD"
           gradle --no-daemon -p android assembleRelease bundleRelease -PstoreFile="$GITHUB_WORKSPACE/android/release.keystore" -PstorePassword="$STORE_PASSWORD" -PkeyAlias="$KEY_ALIAS" -PkeyPassword="$KEY_PASSWORD"
-      - name: Verify signed APK
+      - name: Verify signed release APK
         run: |
           test -s android/app/build/outputs/apk/release/app-release.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
-      - name: Verify AI workspace is packaged
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
+      - name: Verify production workspace is packaged
         run: |
-          test -s android/app/src/main/assets/ai.html
+          test -s android/app/src/main/assets/index.html
           test -s android/app/src/main/assets/knowledge/competencies.json
       - name: Verify AAB exists
         run: test -s android/app/build/outputs/bundle/release/app-release.aab
