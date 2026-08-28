@@ -17,6 +17,7 @@ def main() -> None:
         ROOT / 'governance' / 'PROFESSIONAL_RELEASE_STANDARD.md',
         ROOT / 'quality' / 'test_production_contract.py',
         ROOT / 'quality' / 'test_release_contract.py',
+        ROOT / 'quality' / 'test_delivery_contract.py',
         ROOT / 'autonomy' / 'test_intent_routing.py',
         ROOT / 'autonomy' / 'test_wisdom_governance.py',
     ]
@@ -44,6 +45,9 @@ def main() -> None:
     assert len(html) > 1000, 'application shell unexpectedly small'
     for marker in ('كفايات Ω', 'inferMission', 'القيادة الذاتية'):
         assert marker in html, f'critical UI marker missing: {marker}'
+
+    delivery = (ROOT / 'quality' / 'test_delivery_contract.py').read_text(encoding='utf-8')
+    assert 'DIRECT DELIVERY CONTRACT' in delivery, 'direct delivery contract invalid'
 
     print('GO GATE STRUCTURAL CONTRACT: PASS')
 
