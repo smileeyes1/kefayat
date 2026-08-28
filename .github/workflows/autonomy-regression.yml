@@ -41,6 +41,9 @@ jobs:
       - name: Run continuity runner regression
         run: python3 quality/test_continuity_runner.py
 
+      - name: Run continuity and completion gate
+        run: python3 quality/test_continuity_completion.py
+
       - name: Run production contract regression
         run: python3 quality/test_production_contract.py
 
