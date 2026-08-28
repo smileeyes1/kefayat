@@ -1,0 +1,37 @@
+{
+  "mission_id": "KEFAYAT-PRO-001",
+  "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
+  "objective": "Deliver a professional, evidence-governed Kefayat educational application with autonomous, bounded, resumable execution.",
+  "principles": [
+    "NO EVIDENCE -> NO CLAIM",
+    "NO REGRESSION -> NO REPAIR ACCEPTANCE",
+    "NO SCOPE -> NO BROAD CLAIM",
+    "CRITICAL FAILURE -> NO-GO",
+    "SAFE STOP IS A SUCCESSFUL SAFETY OUTCOME"
+  ],
+  "phases": [
+    {"id":"P01","name":"FOUNDATION","gate":"repository_integrity"},
+    {"id":"P02","name":"KNOWLEDGE","gate":"competency_integrity"},
+    {"id":"P03","name":"PRODUCT","gate":"professional_ui_and_core_workflows"},
+    {"id":"P04","name":"ASSURANCE","gate":"adversarial_and_regression"},
+    {"id":"P05","name":"REAL_MISSION","gate":"real_mission_pilot"},
+    {"id":"P06","name":"RELEASE","gate":"release_gate"}
+  ],
+  "gates": {
+    "repository_integrity": {"required": ["required_files", "json_valid", "governance_present"]},
+    "competency_integrity": {"required": ["schema_valid", "unique_ids", "provenance_present", "source_guard"]},
+    "professional_ui_and_core_workflows": {"required": ["rtl", "kb_load", "grade_filter", "subject_filter", "search", "detail_view"]},
+    "adversarial_and_regression": {"required": ["restart", "corrupt_state", "stagnation", "claim_block", "artifact_identity"]},
+    "real_mission_pilot": {"required": ["frozen_requirements", "evidence_ledger", "adversarial_review", "regression"]},
+    "release_gate": {"required": ["all_prior_gates_pass", "no_critical_findings", "claim_scope_locked"]}
+  },
+  "stop_conditions": [
+    "CRITICAL_FAILURE",
+    "STATE_CORRUPT",
+    "UNTRUSTED_ORACLE",
+    "INSUFFICIENT_EVIDENCE",
+    "UNRESOLVED_REGRESSION",
+    "STAGNATION_DETECTED",
+    "REQUIREMENT_INTEGRITY_FAILURE"
+  ]
+}
