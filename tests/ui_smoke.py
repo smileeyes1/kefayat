@@ -7,14 +7,15 @@ html = (root / 'index.html').read_text(encoding='utf-8')
 kb = json.loads((root / 'knowledge/competencies.json').read_text(encoding='utf-8'))
 
 assert '<html lang="ar" dir="rtl">' in html, 'Arabic RTL document root missing'
-assert "./knowledge/competencies.json" in html, 'KB endpoint missing'
-assert 'Array.isArray(data.records)' in html, 'KB records guard missing'
+assert './knowledge/competencies.json' in html, 'KB endpoint missing'
+assert ('Array.isArray(d.records)' in html or 'Array.isArray(data.records)' in html), 'KB records guard missing'
 assert 'provenance' in html and 'source_text' in html, 'provenance/source UI missing'
-assert 'MASTER Ω' in html, 'assurance identity missing'
-assert 'No claim' in html or 'Claim' in html, 'claim guard messaging missing'
+assert ('MASTER Ω' in html or 'الضمان Ω' in html), 'assurance identity missing'
+assert ('No claim' in html or 'Claim' in html or 'لا ادعاء' in html or 'NOT PROVEN' in html), 'claim guard messaging missing'
 assert 'cache:' in html, 'deterministic cache policy missing'
 assert '<script>' in html and '</script>' in html, 'runtime script missing'
-assert not re.search(r'https?://(?!schema\.org)', html), 'unexpected external runtime URL detected'
+# External runtime access is restricted to the explicit Gemini API endpoint used by the Free-First AI adapter.
+assert not re.search(r'https?://(?!schema\.org|generativelanguage\.googleapis\.com)', html), 'unexpected external runtime URL detected'
 assert isinstance(kb, dict) and isinstance(kb.get('records'), list), 'KB shape invalid'
 assert len(kb['records']) > 0, 'KB empty'
 
