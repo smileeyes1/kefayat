@@ -52,6 +52,9 @@ jobs:
       - name: Run direct delivery contract
         run: python quality/test_delivery_contract.py
 
+      - name: Run continuity and completion gate
+        run: python quality/test_continuity_completion.py
+
       - name: Run autonomy regression
         run: python autonomy/test_controller.py
 
