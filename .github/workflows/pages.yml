@@ -61,6 +61,9 @@ jobs:
       - name: Run production contract regression
         run: python quality/test_production_contract.py
 
+      - name: Run professional release gate
+        run: python quality/test_professional_release.py
+
       - name: Verify release contract
         run: python quality/test_release_contract.py
 
