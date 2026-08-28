@@ -64,6 +64,9 @@ jobs:
       - name: Verify release contract
         run: python quality/test_release_contract.py
 
+      - name: Run hard GO gate
+        run: python quality/test_go_gate.py
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
