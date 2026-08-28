@@ -16,8 +16,6 @@ on:
 permissions:
   contents: read
 
-auto_cancel: true
-
 concurrency:
   group: android-build
   cancel-in-progress: true
