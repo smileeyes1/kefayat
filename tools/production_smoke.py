@@ -1,6 +1,5 @@
 from pathlib import Path
 import json
-import re
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,17 +24,16 @@ if index.exists():
     require('<html lang="ar" dir="rtl">' in text, "Arabic RTL document contract missing")
     require("Evidence-Governed" in text, "Evidence-Governed product marker missing")
     require("Local-First" in text, "Local-First product marker missing")
-    require("Self-Directed" in text, "Self-Directed product marker missing")
+    require("ذاتي القيادة" in text or "Self-Directed" in text, "self-directed product marker missing")
     require("kefayat.gemini.apiKey" in text, "local AI key storage contract missing")
     require("kefayat.gemini.dailyUsage" in text, "local usage governor contract missing")
-    # Guard against the known mathematical visual-order regression in the UI source.
     require("٣ + ٤ = □" not in text and "3 + 4 = □" not in text, "forbidden mathematical visual order found in UI source")
 
 if knowledge.exists():
     try:
         data = json.loads(knowledge.read_text(encoding="utf-8"))
         require(isinstance(data, dict), "knowledge root must be an object")
-        require(data.get("schema_version") == "1.0.0", "unexpected knowledge schema version")
+        require(data.get("schema_version") == "1.3.0", "unexpected knowledge schema version")
         require(isinstance(data.get("records"), list), "knowledge records must be a list")
         require(isinstance(data.get("coverage"), list), "knowledge coverage must be a list")
         require(data.get("provenance_policy") == "USER-PROVIDED REFERENCE unless independently verified", "provenance policy changed unexpectedly")
