@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   structural-validation:
     runs-on: ubuntu-latest
@@ -23,9 +26,30 @@ jobs:
               with open(p, encoding='utf-8') as f: json.load(f)
           print('JSON syntax: PASS')
           PY
+      - name: Validate competency records
+        run: |
+          python - <<'PY'
+          import json, re
+          data=json.load(open('knowledge/competencies.json',encoding='utf-8'))
+          assert isinstance(data,list), 'competencies.json must be an array'
+          ids=set()
+          allowed_grades={1,2,3,4}
+          allowed_subjects={'arabic','mathematics','islamic_education','nurturing'}
+          for i,r in enumerate(data):
+              assert isinstance(r,dict), f'record {i} is not an object'
+              for k in ('id','grade','subject','provenance','source_text'): assert k in r, f'record {i} missing {k}'
+              assert re.fullmatch(r'G[1-4]-[A-Z]+-[0-9]{3,}',r['id']), f"bad id: {r['id']}"
+              assert r['id'] not in ids, f"duplicate id: {r['id']}"
+              ids.add(r['id'])
+              assert r['grade'] in allowed_grades, f"bad grade: {r['grade']}"
+              assert r['subject'] in allowed_subjects, f"bad subject: {r['subject']}"
+              assert isinstance(r['source_text'],str) and r['source_text'].strip(), f"empty source_text: {r['id']}"
+              assert isinstance(r['provenance'],dict) and 'status' in r['provenance'], f"bad provenance: {r['id']}"
+          print(f'Competency records: PASS ({len(data)} records)')
+          PY
       - name: Check anti-hallucination baseline rules
         run: |
-          grep -q 'Do not invent missing competency text' knowledge/competencies.json
+          grep -q 'Do not invent missing competency text' governance/master-omega.md
           grep -q 'No evidence → no claim' governance/master-omega.md
           grep -q 'VALUE.*REQUIRED COUNT.*VISUAL GROUP.*ACTUAL COUNT' governance/master-omega.md
           grep -q 'Mathematical visual order' governance/master-omega.md
