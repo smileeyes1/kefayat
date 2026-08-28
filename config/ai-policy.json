@@ -1,0 +1,31 @@
+{
+  "version": "1.0",
+  "mode": "LOCAL_FIRST",
+  "cloud_default": false,
+  "allow_cloud_only_when_needed": true,
+  "require_cache_lookup_before_cloud": true,
+  "require_deduplication": true,
+  "require_minimal_payload": true,
+  "require_user_consent_for_user_owned_credentials": true,
+  "never_bypass_provider_limits": true,
+  "never_store_provider_secrets_in_repository": true,
+  "fallback_order": [
+    "deterministic_local",
+    "cache",
+    "local_model",
+    "allowed_free_provider",
+    "safe_pause_resume"
+  ],
+  "quota_policy": {
+    "budget_owner": "end_user_or_provider_according_to_authorized_flow",
+    "hard_stop_before_limit": true,
+    "no_quota_evasion": true,
+    "no_parallel_account_abuse": true,
+    "no_credential_sharing": true
+  },
+  "data_policy": {
+    "curriculum_knowledge_is_local_by_default": true,
+    "send_only_minimum_required_context": true,
+    "do_not_send_sensitive_data_unnecessarily": true
+  }
+}
