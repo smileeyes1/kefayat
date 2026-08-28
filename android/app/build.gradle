@@ -1,6 +1,36 @@
 plugins { id 'com.android.application' }
 
-android { namespace 'com.kefayat.gem'; compileSdk 35
-    defaultConfig { applicationId 'com.kefayat.gem'; minSdk 23; targetSdk 35; versionCode 1; versionName '1.0.0' }
-    buildTypes { release { minifyEnabled false; proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' } }
+android {
+    namespace 'com.kefayat.gem'
+    compileSdk 35
+    defaultConfig {
+        applicationId 'com.kefayat.gem'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+    def releaseStore = project.findProperty('storeFile')
+    def releaseStorePassword = project.findProperty('storePassword')
+    def releaseKeyAlias = project.findProperty('keyAlias')
+    def releaseKeyPassword = project.findProperty('keyPassword')
+    signingConfigs {
+        if (releaseStore && releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+            release {
+                storeFile file(releaseStore)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (releaseStore && releaseStorePassword && releaseKeyAlias && releaseKeyPassword) {
+                signingConfig signingConfigs.release
+            }
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
 }
