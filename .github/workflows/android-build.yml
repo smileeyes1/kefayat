@@ -29,9 +29,6 @@ on:
 permissions:
   contents: read
 
-actions:
-  cancel-in-progress: true
-
 concurrency:
   group: android-build-${{ github.ref }}
   cancel-in-progress: true
