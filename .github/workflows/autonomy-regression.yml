@@ -24,6 +24,12 @@ jobs:
       - name: Run mission-plan regression
         run: python3 autonomy/test_mission_plan.py
 
+      - name: Run intent-routing regression
+        run: python3 autonomy/test_intent_routing.py
+
+      - name: Run Wisdom Ω governance regression
+        run: python3 autonomy/test_wisdom_governance.py
+
       - name: Run release contract regression
         run: python3 quality/test_release_contract.py
 
