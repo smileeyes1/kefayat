@@ -37,25 +37,40 @@ def parse_file(path, grade, subject):
     lines = [clean(x) for x in text.splitlines() if clean(x)]
     records = []
     for line in lines:
-        if line.startswith("[TABLE") or "المجال |" in line or "المجال|" in line:
+        if line.startswith("[TABLE"):
             continue
         if " | " not in line:
             continue
         cells = [clean(x) for x in line.split(" | ")]
-        if len(cells) < 7:
-            continue
-        if cells[0] in {"المجال", "المجال المعرفي"} or cells[3] in {"المعايير", "المعيار"}:
-            continue
-        mastery = {"يتقن": cells[-3], "يطور": cells[-2], "يحاول": cells[-1]}
+        # Supported source shapes:
+        # 7+ cells: domain, main, sub, criterion, outcomes, mastery x3, optional values.
+        # 6 cells (Islamic Education): main, sub, criterion, mastery x3.
+        if subject == "islamic_education" and len(cells) >= 6:
+            if cells[0] in {"الكفايات الرئيسة", "المجال"}:
+                continue
+            domain, main, sub, criterion = None, cells[0], cells[1], cells[2]
+            mastery = {"يتقن": cells[3], "يطور": cells[4], "يحاول": cells[5]}
+            outcome = None
+        else:
+            if len(cells) < 7:
+                continue
+            if cells[0] in {"المجال", "المجال المعرفي"} or cells[3] in {"المعايير", "المعيار"}:
+                continue
+            domain, main, sub, criterion = cells[0], cells[1], cells[2], cells[3]
+            # For standard 7-column sources, cells 4+ contain outcome/mastery/values.
+            # Keep the original row untouched for traceability.
+            outcome = cells[4] if len(cells) >= 8 else None
+            mastery = {"يتقن": cells[-3], "يطور": cells[-2], "يحاول": cells[-1]}
+
         rec = {
             "id": stable_id(grade, subject, len(records) + 1),
             "grade": grade,
             "subject": subject,
-            "domain": cells[0] or None,
-            "main_competency": cells[1] or None,
-            "sub_competency": cells[2] or None,
-            "criterion": cells[3] or None,
-            "learning_outcomes": [],
+            "domain": domain or None,
+            "main_competency": main or None,
+            "sub_competency": sub or None,
+            "criterion": criterion or None,
+            "learning_outcomes": [outcome] if outcome else [],
             "mastery_levels": mastery,
             "values": [],
             "provenance": {
@@ -83,7 +98,7 @@ for subject, grades in FILES.items():
 status = "COMPLETE_STRUCTURAL_PARSE" if all(x["status"] == "PARSED" for x in coverage) else "INCOMPLETE_SOURCE_COVERAGE"
 OUT.parent.mkdir(exist_ok=True)
 OUT.write_text(json.dumps({
-    "schema_version": "1.1.0",
+    "schema_version": "1.2.0",
     "status": status,
     "provenance_policy": "USER-PROVIDED REFERENCE unless independently verified",
     "records": records,
