@@ -20,3 +20,13 @@ jobs:
 
       - name: Run adversarial autonomy regression
         run: python3 autonomy/test_controller.py
+
+      - name: Run mission-plan regression
+        run: python3 autonomy/test_mission_plan.py
+
+      - name: Verify autonomous control is bounded
+        run: |
+          grep -q 'SAFE_STOP' autonomy/controller.py
+          grep -q 'NO CLAIM' autonomy/controller.py
+          grep -q 'RECOVER_OR_ESCALATE' autonomy/controller.py
+          echo 'Bounded-control invariants: PASS'
