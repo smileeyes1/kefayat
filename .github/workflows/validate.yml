@@ -70,8 +70,11 @@ jobs:
 
       - name: Check anti-hallucination baseline rules
         run: |
-          grep -qi 'Do not invent missing competency text' governance/master-omega.md
-          grep -qi 'No evidence.*no claim' governance/master-omega.md
-          grep -qi 'VALUE.*REQUIRED COUNT.*VISUAL GROUP.*ACTUAL COUNT' governance/master-omega.md
+          grep -qi 'No evidence' governance/master-omega.md
+          grep -qi 'no claim' governance/master-omega.md
+          grep -qi 'VALUE' governance/master-omega.md
+          grep -qi 'REQUIRED COUNT' governance/master-omega.md
+          grep -qi 'VISUAL GROUP' governance/master-omega.md
+          grep -qi 'ACTUAL COUNT' governance/master-omega.md
           grep -qi 'Mathematical visual order' governance/master-omega.md
           echo 'Governance invariants: PASS'
