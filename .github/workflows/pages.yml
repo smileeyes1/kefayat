@@ -46,6 +46,12 @@ jobs:
       - name: Rebuild structured competency knowledge
         run: python tools/build_competencies.py
 
+      - name: Run autonomous continuity runner
+        run: python autonomy/continuity_runner.py
+
+      - name: Run direct delivery contract
+        run: python quality/test_delivery_contract.py
+
       - name: Run autonomy regression
         run: python autonomy/test_controller.py
 
