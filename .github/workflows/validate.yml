@@ -20,6 +20,7 @@ jobs:
           test -f knowledge/schema/competency.schema.json
           test -f governance/master-omega.md
           test -f tools/build_competencies.py
+          test -f tests/ui_smoke.py
 
       - name: Validate JSON
         run: |
@@ -78,3 +79,6 @@ jobs:
           grep -qi 'ACTUAL COUNT' governance/master-omega.md
           grep -qi 'Mathematical visual order' governance/master-omega.md
           echo 'Governance invariants: PASS'
+
+      - name: UI smoke validation
+        run: python tests/ui_smoke.py
