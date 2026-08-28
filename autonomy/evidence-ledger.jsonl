@@ -1,0 +1,1 @@
+{"timestamp_utc": "2026-08-28T14:35:55Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-PLAN-01", "expected": "bounded mission plan is valid", "observed": "valid", "method": "JSON + invariant checks", "decision": "PASS"}
