@@ -8,11 +8,12 @@ ROOT=Path(os.environ.get("KEFAYAT_ROOT",str(Path(__file__).resolve().parents[1])
 STATE=AUTO/"mission-state.json"; LEDGER=AUTO/"evidence-ledger.jsonl"; PLAN=AUTO/"mission-plan.json"; KB=ROOT/"knowledge"/"competencies.json"
 MAX_STAGNANT_CYCLES=3; ALLOWED_GRADES={1,2,3,4}; ALLOWED_SUBJECTS={"arabic","mathematics","islamic_education","nurturing"}
 def digest(p:Path)->str:
- h=hashlib.sha256();
+ h=hashlib.sha256()
  with p.open("rb") as f:
   for c in iter(lambda:f.read(1024*1024),b""): h.update(c)
  return h.hexdigest()
-def default_state()->dict[str,Any]: return {"mission_id":"KEFAYAT-PRO-001","baseline_id":"MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01","phase":"BOOT","status":"RUNNING","completed_tasks":[],"open_gaps":["FULL_AUTONOMOUS_DEVELOPMENT","REAL_MISSION_PILOT"],"blockers":[],"attempt_counters":{},"stagnant_cycles":0,"last_checkpoint":None,"artifact_identities":{},"evidence_state":"UNREPORTED","claim_state":"NO CLAIM","release_state":"NOT READY","next_best_action":"BOOTSTRAP","history":[]}
+def default_state()->dict[str,Any]:
+ return {"mission_id":"KEFAYAT-AUTO-001","baseline_id":"MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01","phase":"BOOT","status":"RUNNING","completed_tasks":[],"open_gaps":["FULL_AUTONOMOUS_DEVELOPMENT","REAL_MISSION_PILOT"],"blockers":[],"attempt_counters":{},"stagnant_cycles":0,"last_checkpoint":None,"artifact_identities":{},"evidence_state":"UNREPORTED","claim_state":"NO CLAIM","release_state":"NOT READY","next_best_action":"BOOTSTRAP","history":[]}
 def load_state()->dict[str,Any]:
  if not STATE.exists(): return default_state()
  try:
@@ -26,12 +27,13 @@ def record(s:dict[str,Any],tid:str,expected:str,observed:str,decision:str,method
 def validate_plan(s:dict[str,Any])->bool:
  try:
   d=json.loads(PLAN.read_text(encoding="utf-8")); assert d["mission_id"]==s["mission_id"]; assert d["baseline_id"]==s["baseline_id"]; assert isinstance(d["phases"],list) and len(d["phases"])>=6; assert isinstance(d["gates"],dict) and len(d["gates"])>=6; assert d["stop_conditions"]; record(s,"AUTO-PLAN-01","bounded mission plan is valid","valid","PASS","JSON + invariant checks"); return True
- except Exception as e: s["blockers"]=[x for x in s["blockers"] if not x.startswith("PLAN_INVALID")]+[f"PLAN_INVALID:{type(e).__name__}"]; record(s,"AUTO-PLAN-01","bounded mission plan is valid",str(e),"NO-GO","mission-plan invariant checks"); return False
+ except Exception as e:
+  s["blockers"]=[x for x in s["blockers"] if not x.startswith("PLAN_INVALID")]+[f"PLAN_INVALID:{type(e).__name__}"]; record(s,"AUTO-PLAN-01","bounded mission plan is valid",str(e),"NO-GO","mission-plan invariant checks"); return False
 def validate_kb(s:dict[str,Any])->bool:
  if not KB.exists(): record(s,"AUTO-KB-01","canonical KB exists","missing","BLOCKED","filesystem"); s["blockers"].append("KB_MISSING"); return False
  try:
   d=json.loads(KB.read_text(encoding="utf-8")); assert isinstance(d,dict); rs,cv=d.get("records"),d.get("coverage"); assert isinstance(rs,list) and isinstance(cv,list) and rs; ids=set()
-  for i,r in enumerate(rs):
+  for r in rs:
    assert isinstance(r,dict)
    for k in ("id","grade","subject","provenance","source_text"): assert k in r
    assert r["id"] not in ids; ids.add(r["id"]); assert r["grade"] in ALLOWED_GRADES; assert r["subject"] in ALLOWED_SUBJECTS; assert isinstance(r["source_text"],str) and r["source_text"].strip(); assert isinstance(r["provenance"],dict) and r["provenance"].get("status")
