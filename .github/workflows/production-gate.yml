@@ -10,6 +10,9 @@ on:
       - 'manifest.webmanifest'
       - 'knowledge/**'
       - 'tools/**'
+      - 'autonomy/**'
+      - 'quality/**'
+      - 'governance/**'
       - 'android/**'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -24,7 +27,7 @@ concurrency:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -34,11 +37,29 @@ jobs:
         run: python tools/build_competencies.py
       - name: Deterministic production smoke
         run: python tools/production_smoke.py
+      - name: Autonomy regression
+        run: python autonomy/test_controller.py
+      - name: Mission-plan regression
+        run: python autonomy/test_mission_plan.py
+      - name: Intent-routing regression
+        run: python autonomy/test_intent_routing.py
+      - name: Wisdom governance regression
+        run: python autonomy/test_wisdom_governance.py
+      - name: Continuity and completion gate
+        run: python quality/test_continuity_completion.py
+      - name: Professional release gate
+        run: python quality/test_professional_release.py
+      - name: Release contract
+        run: python quality/test_release_contract.py
+      - name: Hard GO gate
+        run: python quality/test_go_gate.py
+      - name: Delivery contract
+        run: python quality/test_delivery_contract.py
 
   android-release-build:
     needs: smoke
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -72,18 +93,19 @@ jobs:
           set -euo pipefail
           APK="android/app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
-          echo 'APK entries:'
-          unzip -Z1 "$APK" | sort | grep -E '(^|/)assets/' | head -100
           unzip -Z1 "$APK" | grep -Fx 'assets/index.html'
           unzip -Z1 "$APK" | grep -Fx 'assets/knowledge/competencies.json'
           unzip -p "$APK" assets/index.html | grep -q 'كفايات Ω'
           unzip -p "$APK" assets/index.html | grep -q 'القيادة الذاتية'
           unzip -p "$APK" assets/knowledge/competencies.json | python -c 'import json,sys; d=json.load(sys.stdin); assert isinstance(d.get("records"),list) and d["records"]; print("APK knowledge records:",len(d["records"]))'
+          sha256sum "$APK" | tee android-release-sha256.txt
           echo 'RELEASE APK CONTENTS: PASS'
-      - name: Upload unsigned release APK artifact
+      - name: Upload release APK and checksum
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kefayat-release-apk-unsigned
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: kefayat-release-apk
+          path: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android-release-sha256.txt
           if-no-files-found: warn
