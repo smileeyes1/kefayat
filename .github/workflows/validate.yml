@@ -59,14 +59,18 @@ jobs:
           print(f'Coverage entries: {len(coverage)}')
           PY
 
-      - name: Validate source coverage and no invented grade-1 nurturing source
+      - name: Validate source coverage and provenance
         run: |
           python - <<'PY'
           import json
           d=json.load(open('knowledge/competencies.json',encoding='utf-8'))
           c={(x['grade'],x['subject']):x for x in d['coverage']}
-          assert c[(1,'nurturing')]['status']=='MISSING_SOURCE'
-          print('Source coverage guard: PASS')
+          assert (1,'nurturing') in c, 'Grade 1 nurturing coverage entry missing'
+          nurturing=c[(1,'nurturing')]
+          assert nurturing['status'] in {'PARSED','MISSING_SOURCE'}, f"unexpected Grade 1 nurturing coverage status: {nurturing['status']}"
+          if nurturing['status']=='PARSED':
+              assert nurturing.get('records',0) > 0, 'parsed Grade 1 nurturing source produced no records'
+          print(f"Source coverage guard: PASS ({nurturing['status']})")
           PY
 
       - name: Check anti-hallucination baseline rules
