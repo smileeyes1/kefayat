@@ -33,6 +33,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -57,6 +58,9 @@ jobs:
       - name: Run Wisdom Ω governance regression
         run: python autonomy/test_wisdom_governance.py
 
+      - name: Run production contract regression
+        run: python quality/test_production_contract.py
+
       - name: Verify release contract
         run: python quality/test_release_contract.py
 
@@ -71,3 +75,17 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Runtime smoke test
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          echo "Runtime URL: ${PAGE_URL}"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 3 "${PAGE_URL}" -o /tmp/kefayat.html
+          test -s /tmp/kefayat.html
+          grep -q 'كفايات Ω' /tmp/kefayat.html
+          grep -q 'inferMission' /tmp/kefayat.html
+          grep -q 'WISDOM' /tmp/kefayat.html
+          grep -q 'القيادة الذاتية' /tmp/kefayat.html
+          echo 'RUNTIME SMOKE TEST: PASS'
