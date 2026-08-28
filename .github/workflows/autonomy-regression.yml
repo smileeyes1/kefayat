@@ -16,13 +16,16 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Run adversarial autonomy regression
         run: python3 autonomy/test_controller.py
 
       - name: Run mission-plan regression
         run: python3 autonomy/test_mission_plan.py
+
+      - name: Run release contract regression
+        run: python3 quality/test_release_contract.py
 
       - name: Verify autonomous control is bounded
         run: |
