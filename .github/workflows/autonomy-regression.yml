@@ -41,6 +41,9 @@ jobs:
       - name: Run production contract regression
         run: python3 quality/test_production_contract.py
 
+      - name: Run professional release gate
+        run: python3 quality/test_professional_release.py
+
       - name: Run release contract regression
         run: python3 quality/test_release_contract.py
 
