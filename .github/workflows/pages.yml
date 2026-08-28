@@ -11,6 +11,8 @@ on:
       - 'knowledge/**'
       - 'GEM_KB_*.md'
       - 'raw_sources/**'
+      - 'tools/**'
+      - 'quality/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -30,18 +32,28 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+
       - name: Rebuild structured competency knowledge
         run: python tools/build_competencies.py
+
+      - name: Verify release contract
+        run: python quality/test_release_contract.py
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
           path: .
-      - name: Deploy
+
+      - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
