@@ -31,7 +31,7 @@ def main() -> None:
 
     wisdom = (ROOT / 'governance' / 'WISDOM_GOVERNANCE.md').read_text(encoding='utf-8')
     continuity = (ROOT / 'governance' / 'CONTINUITY_AND_COMPLETION_CONTRACT.md').read_text(encoding='utf-8')
-    for marker in ('truth', 'evidence', 'human', 'stop', 'regression'):
+    for marker in ('evidence', 'human', 'stop', 'regression', 'proven'):
         assert marker.lower() in wisdom.lower(), f'wisdom contract marker missing: {marker}'
     for marker in ('continue', 'external blocker', 'system of record', 'release ladder'):
         assert marker.lower() in continuity.lower(), f'continuity contract marker missing: {marker}'
