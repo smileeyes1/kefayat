@@ -2,10 +2,22 @@ name: Android Build and Assurance
 
 on:
   push:
-    branches: [main]
+    branches: [main, release-hardening-20260828]
     paths:
       - 'android/**'
       - 'index.html'
+      - 'ai.html'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'knowledge/**'
+      - 'raw_sources/**'
+      - 'tools/**'
+      - '.github/workflows/android-build.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'index.html'
+      - 'ai.html'
       - 'sw.js'
       - 'manifest.webmanifest'
       - 'knowledge/**'
@@ -16,10 +28,9 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 concurrency:
-  group: android-build
+  group: android-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,11 +47,14 @@ jobs:
           python-version: '3.12'
       - name: Build structured competency knowledge
         run: python tools/build_competencies.py
-      - name: Stage offline web application into APK assets
+      - name: Stage complete offline AI workspace into APK assets
         run: |
+          rm -rf android/app/src/main/assets
           mkdir -p android/app/src/main/assets/knowledge
-          cp index.html sw.js manifest.webmanifest android/app/src/main/assets/
+          cp index.html ai.html sw.js manifest.webmanifest android/app/src/main/assets/
           cp knowledge/competencies.json android/app/src/main/assets/knowledge/
+          test -s android/app/src/main/assets/ai.html
+          test -s android/app/src/main/assets/knowledge/competencies.json
       - uses: android-actions/setup-android@v3
       - name: Install Android SDK components
         run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
@@ -48,11 +62,13 @@ jobs:
         with:
           gradle-version: '8.10'
       - name: Build debug APK
-        run: gradle --no-daemon -p android assembleDebug
+        run: gradle --no-daemon -p android clean assembleDebug
       - name: Verify APK exists and is non-empty
         run: test -s android/app/build/outputs/apk/debug/app-debug.apk
-      - name: Verify bundled knowledge base exists
-        run: test -s android/app/build/intermediates/merged_assets/debug/mergeDebugAssets/out/knowledge/competencies.json
+      - name: Verify AI workspace and knowledge base are bundled
+        run: |
+          test -s android/app/build/intermediates/merged_assets/debug/mergeDebugAssets/out/ai.html
+          test -s android/app/build/intermediates/merged_assets/debug/mergeDebugAssets/out/knowledge/competencies.json
       - name: Upload installable debug APK
         uses: actions/upload-artifact@v4
         with:
