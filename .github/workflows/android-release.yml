@@ -37,7 +37,7 @@ jobs:
         run: |
           test -n "$KEYSTORE_B64"
           echo "$KEYSTORE_B64" | base64 --decode > android/release.keystore
-      - name: Build signed release APK
+      - name: Build signed release APK and AAB
         env:
           STORE_PASSWORD: ${{ secrets.KEFAYAT_STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEFAYAT_KEY_ALIAS }}
@@ -46,16 +46,20 @@ jobs:
           test -n "$STORE_PASSWORD"
           test -n "$KEY_ALIAS"
           test -n "$KEY_PASSWORD"
-          gradle --no-daemon -p android assembleRelease -PstoreFile="$GITHUB_WORKSPACE/android/release.keystore" -PstorePassword="$STORE_PASSWORD" -PkeyAlias="$KEY_ALIAS" -PkeyPassword="$KEY_PASSWORD"
+          gradle --no-daemon -p android assembleRelease bundleRelease -PstoreFile="$GITHUB_WORKSPACE/android/release.keystore" -PstorePassword="$STORE_PASSWORD" -PkeyAlias="$KEY_ALIAS" -PkeyPassword="$KEY_PASSWORD"
       - name: Verify signed APK
         run: |
           test -s android/app/build/outputs/apk/release/app-release.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
-      - name: Upload signed release APK
+      - name: Verify AAB exists
+        run: test -s android/app/build/outputs/bundle/release/app-release.aab
+      - name: Upload signed release artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: kefayat-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: kefayat-release-artifacts
+          path: |
+            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
       - name: Cleanup signing material
         if: always()
