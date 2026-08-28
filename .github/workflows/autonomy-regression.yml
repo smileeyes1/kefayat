@@ -1,0 +1,22 @@
+name: Kefayat Ω Autonomy Regression
+
+on:
+  push:
+    branches: ["main", "feat/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  autonomy-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run adversarial autonomy regression
+        run: python3 autonomy/test_controller.py
