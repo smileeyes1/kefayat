@@ -24,21 +24,37 @@ def main() -> None:
     assert PAGES.exists(), "GitHub Pages workflow missing"
 
     kb = json.loads(KB.read_text(encoding="utf-8"))
-    assert kb.get("records"), "knowledge records missing"
-    assert kb.get("coverage"), "knowledge coverage missing"
+    records = kb.get("records")
+    assert records and isinstance(records, list), "knowledge records missing"
+    assert kb.get("coverage") and isinstance(kb["coverage"], list), "knowledge coverage missing"
+
+    math_records = [r for r in records if r.get("grade") == 1 and r.get("subject") == "mathematics"]
+    arabic_records = [r for r in records if r.get("grade") == 1 and r.get("subject") == "arabic"]
+    assert math_records, "Grade 1 mathematics records missing"
+    assert arabic_records, "Grade 1 Arabic records missing; negative cross-domain guard cannot be exercised"
 
     math_text = MATH.read_text(encoding="utf-8")
     assert "العدد 1" in math_text or "العدد ١" in math_text, "Grade 1 number-1 competency not present"
 
     page_text = PAGES.read_text(encoding="utf-8")
-    for required in ("actions/configure-pages@v5", "actions/upload-pages-artifact@v4", "actions/deploy-pages@v4", "pages: write", "id-token: write"):
-        assert required in page_text, f"Pages deployment contract missing: {required}"
+    for required in (
+        "actions/configure-pages@v5",
+        "actions/upload-pages-artifact@v4",
+        "actions/deploy-pages@v4",
+        "pages: write",
+        "id-token: write",
+        "python tools/build_competencies.py",
+        "python autonomy/test_intent_routing.py",
+        "python autonomy/test_wisdom_governance.py",
+    ):
+        assert required in page_text, f"Pages release gate missing: {required}"
 
-    # The UI must contain explicit cross-domain routing protection. This is a
-    # structural guard, not a substitute for browser/runtime testing.
+    # The UI must contain the actual routing contract. The test intentionally
+    # does not require a particular competency ID to be hard-coded into the UI.
+    # Negative cross-domain evidence belongs in the structured knowledge tests.
     ui = INDEX.read_text(encoding="utf-8")
-    routing_markers = ("رياضيات", "G1-ARABIC", "domain", "subject")
-    assert all(marker in ui for marker in routing_markers), "cross-domain routing guard markers missing from UI"
+    routing_markers = ("inferMission", "retrieveMission", "mathematics", "subject", "WISDOM")
+    assert all(marker in ui for marker in routing_markers), "routing contract markers missing from UI"
 
     print("RELEASE CONTRACT REGRESSION: PASS")
 
