@@ -38,8 +38,14 @@ jobs:
       - name: Run Wisdom Ω governance regression
         run: python3 autonomy/test_wisdom_governance.py
 
+      - name: Run production contract regression
+        run: python3 quality/test_production_contract.py
+
       - name: Run release contract regression
         run: python3 quality/test_release_contract.py
+
+      - name: Run hard GO gate
+        run: python3 quality/test_go_gate.py
 
       - name: Verify autonomous control is bounded
         run: |
