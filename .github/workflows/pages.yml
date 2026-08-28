@@ -12,7 +12,9 @@ on:
       - 'GEM_KB_*.md'
       - 'raw_sources/**'
       - 'tools/**'
+      - 'autonomy/**'
       - 'quality/**'
+      - 'governance/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -42,6 +44,18 @@ jobs:
 
       - name: Rebuild structured competency knowledge
         run: python tools/build_competencies.py
+
+      - name: Run autonomy regression
+        run: python autonomy/test_controller.py
+
+      - name: Run mission-plan regression
+        run: python autonomy/test_mission_plan.py
+
+      - name: Run intent-routing regression
+        run: python autonomy/test_intent_routing.py
+
+      - name: Run Wisdom Ω governance regression
+        run: python autonomy/test_wisdom_governance.py
 
       - name: Verify release contract
         run: python quality/test_release_contract.py
