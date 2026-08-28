@@ -1,0 +1,21 @@
+name: Kefayat Ω Intent Routing Regression
+
+on:
+  push:
+    branches: ["main", "feat/**"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  intent-routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run adversarial intent routing regression
+        run: python3 autonomy/test_intent_routing.py
