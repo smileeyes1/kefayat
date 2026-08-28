@@ -1,0 +1,11 @@
+{
+  "name": "كفايات Ω — GEM",
+  "short_name": "كفايات Ω",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#17324d",
+  "description": "مساحة عمل محلية أولًا لتحويل الكفايات إلى تعلم قابل للتتبع والتحقق."
+}
