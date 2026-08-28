@@ -18,6 +18,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Rebuild structured competency knowledge
+        run: python3 tools/build_competencies.py
+
       - name: Run adversarial autonomy regression
         run: python3 autonomy/test_controller.py
 
