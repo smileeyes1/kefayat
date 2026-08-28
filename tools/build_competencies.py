@@ -7,17 +7,17 @@ RAW = ROOT / "raw_sources"
 OUT = ROOT / "knowledge" / "competencies.json"
 
 FILES = {
-    "arabic": [1,2,3,4],
-    "mathematics": [1,2,3,4],
-    "islamic_education": [1,2,3,4],
-    "nurturing": [2,3,4],
+    "arabic": [1, 2, 3, 4],
+    "mathematics": [1, 2, 3, 4],
+    "islamic_education": [1, 2, 3, 4],
+    "nurturing": [1, 2, 3, 4],
 }
 
 RAW_SUBJECT = {
-    "arabic":"arabic",
-    "mathematics":"math",
-    "islamic_education":"islamic",
-    "nurturing":"nurturing",
+    "arabic": "arabic",
+    "mathematics": "math",
+    "islamic_education": "islamic",
+    "nurturing": "nurturing",
 }
 
 
@@ -32,7 +32,7 @@ def stable_id(grade, subject, n):
 
 def parse_file(path, grade, subject):
     if not path.exists():
-        return [], {"status":"MISSING","path":str(path.relative_to(ROOT))}
+        return [], {"status": "MISSING", "path": str(path.relative_to(ROOT))}
     text = path.read_text(encoding="utf-8")
     lines = [clean(x) for x in text.splitlines() if clean(x)]
     records = []
@@ -44,13 +44,11 @@ def parse_file(path, grade, subject):
         cells = [clean(x) for x in line.split(" | ")]
         if len(cells) < 7:
             continue
-        # Expected source table order: domain, main competency, sub competency,
-        # criterion, mastery=يتقن/يطور/يحاول. Extra columns are retained in source_row.
         if cells[0] in {"المجال", "المجال المعرفي"} or cells[3] in {"المعايير", "المعيار"}:
             continue
         mastery = {"يتقن": cells[-3], "يطور": cells[-2], "يحاول": cells[-1]}
         rec = {
-            "id": stable_id(grade, subject, len(records)+1),
+            "id": stable_id(grade, subject, len(records) + 1),
             "grade": grade,
             "subject": subject,
             "domain": cells[0] or None,
@@ -70,29 +68,26 @@ def parse_file(path, grade, subject):
             "source_row": cells
         }
         records.append(rec)
-    return records, {"status":"PARSED","path":str(path.relative_to(ROOT)),"bytes":path.stat().st_size}
+    return records, {"status": "PARSED", "path": str(path.relative_to(ROOT)), "bytes": path.stat().st_size}
 
-records=[]
-coverage=[]
+
+records = []
+coverage = []
 for subject, grades in FILES.items():
     for grade in grades:
-        p=RAW / f"{RAW_SUBJECT[subject]}_grade_{grade}.txt"
-        rows, meta=parse_file(p, grade, subject)
+        p = RAW / f"{RAW_SUBJECT[subject]}_grade_{grade}.txt"
+        rows, meta = parse_file(p, grade, subject)
         records.extend(rows)
-        coverage.append({"grade":grade,"subject":subject,**meta,"records":len(rows)})
+        coverage.append({"grade": grade, "subject": subject, **meta, "records": len(rows)})
 
-# Nurturing grade 1 is deliberately absent until a recoverable source is found.
-for grade in [1]:
-    coverage.append({"grade":grade,"subject":"nurturing","status":"MISSING_SOURCE","path":None,"records":0})
-
-status = "COMPLETE_STRUCTURAL_PARSE" if all(x["status"] in {"PARSED"} for x in coverage) else "INCOMPLETE_SOURCE_COVERAGE"
+status = "COMPLETE_STRUCTURAL_PARSE" if all(x["status"] == "PARSED" for x in coverage) else "INCOMPLETE_SOURCE_COVERAGE"
 OUT.parent.mkdir(exist_ok=True)
 OUT.write_text(json.dumps({
-    "schema_version":"1.0.0",
-    "status":status,
-    "provenance_policy":"USER-PROVIDED REFERENCE unless independently verified",
-    "records":records,
-    "coverage":coverage,
-    "rule":"No missing competency text is invented. Source text is preserved per record; normalization is separate."
-}, ensure_ascii=False, indent=2)+"\n", encoding="utf-8")
+    "schema_version": "1.1.0",
+    "status": status,
+    "provenance_policy": "USER-PROVIDED REFERENCE unless independently verified",
+    "records": records,
+    "coverage": coverage,
+    "rule": "No missing competency text is invented. Source text is preserved per record; normalization is separate."
+}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 print(f"Generated {len(records)} structured records; status={status}")
