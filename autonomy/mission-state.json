@@ -16,14 +16,14 @@
   "blockers": [],
   "attempt_counters": {},
   "stagnant_cycles": 0,
-  "last_checkpoint": "2026-08-29T11:18:29Z",
+  "last_checkpoint": "2026-08-29T15:44:01Z",
   "artifact_identities": {
     "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1"
   },
   "evidence_state": "UNREPORTED",
   "claim_state": "NO CLAIM",
   "release_state": "NOT READY",
-  "next_best_action": "CHECK_RELEASE_GATE",
+  "next_best_action": "WAIT_FOR_NEXT_MISSION",
   "history": [
     {
       "action": "VALIDATE_PLAN",
@@ -44,6 +44,11 @@
       "action": "CHECK_RELEASE_GATE",
       "status": "RUNNING",
       "checkpoint": "2026-08-29T11:18:29Z"
+    },
+    {
+      "action": "WAIT_FOR_NEXT_MISSION",
+      "status": "RUNNING",
+      "checkpoint": "2026-08-29T15:44:01Z"
     }
   ]
 }
