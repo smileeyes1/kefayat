@@ -1,0 +1,76 @@
+name: Build GEM Knowledge Pack
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Assemble curated Gemini package
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf dist/gem-knowledge
+          mkdir -p dist/gem-knowledge/01_CORE dist/gem-knowledge/02_MATHEMATICS dist/gem-knowledge/03_ARABIC dist/gem-knowledge/04_ISLAMIC_EDUCATION dist/gem-knowledge/05_NURTURING dist/gem-knowledge/06_ASSURANCE
+
+          cp GEM_KNOWLEDGE_PACK/README_FOR_GEM.md dist/gem-knowledge/README.md
+          cp GEM_KNOWLEDGE_PACK/00_KB_INDEX_AND_AUTHORITY.md dist/gem-knowledge/01_CORE/
+          cp GEM_KNOWLEDGE_PACK/01_EDUCATIONAL_KNOWLEDGE_MODEL.md dist/gem-knowledge/01_CORE/
+          cp GEM_KNOWLEDGE_PACK/06_COMPETENCY_REASONING_RULES.md dist/gem-knowledge/01_CORE/
+
+          cp GEM_KNOWLEDGE_PACK/02_MATH_VISUAL_CONSTITUTION.md dist/gem-knowledge/06_ASSURANCE/
+          cp GEM_KNOWLEDGE_PACK/03_WORKSHEET_ARTIFACT_SPEC.md dist/gem-knowledge/06_ASSURANCE/
+          cp GEM_KNOWLEDGE_PACK/04_QUALITY_ASSURANCE_AND_RELEASE.md dist/gem-knowledge/06_ASSURANCE/
+          cp GEM_KNOWLEDGE_PACK/05_ARABIC_AND_LOCALIZATION.md dist/gem-knowledge/06_ASSURANCE/
+          cp GEM_KNOWLEDGE_PACK/KEFAYAT_OMEGA_MASTER_KNOWLEDGE_AR.md dist/gem-knowledge/06_ASSURANCE/
+
+          cp GEM_KB_MATH_GRADES_1-4.md dist/gem-knowledge/02_MATHEMATICS/
+          cp GEM_KB_ARABIC_GRADES_1-4.md dist/gem-knowledge/03_ARABIC/
+          cp GEM_KB_ISLAMIC_EDUCATION_GRADES_1-4.md dist/gem-knowledge/04_ISLAMIC_EDUCATION/
+          cp GEM_KB_ISLAMIC_GRADES_1-4.md dist/gem-knowledge/04_ISLAMIC_EDUCATION/
+          cp GEM_KB_NURTURING_GRADES_1-4.md dist/gem-knowledge/05_NURTURING/
+
+          cat > dist/gem-knowledge/MANIFEST.md <<'EOF'
+          # KEFAYAT Ω — Gemini Upload Manifest
+
+          Upload the contents of this directory as Gemini Gem knowledge.
+
+          Priority order:
+          1. Core knowledge model and competency reasoning
+          2. Subject knowledge
+          3. Assurance and visual safeguards
+
+          The package is knowledge, not a replacement for the Gem's custom instructions. Custom instructions should control behavior; these files supply domain knowledge and deterministic assurance rules.
+
+          Included domains: Mathematics, Arabic, Islamic Education, Nurturing/civic-life, plus cross-domain assurance.
+          EOF
+
+      - name: Validate package
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s dist/gem-knowledge/README.md
+          test -s dist/gem-knowledge/01_CORE/00_KB_INDEX_AND_AUTHORITY.md
+          test -s dist/gem-knowledge/02_MATHEMATICS/GEM_KB_MATH_GRADES_1-4.md
+          test -s dist/gem-knowledge/03_ARABIC/GEM_KB_ARABIC_GRADES_1-4.md
+          test -s dist/gem-knowledge/04_ISLAMIC_EDUCATION/GEM_KB_ISLAMIC_EDUCATION_GRADES_1-4.md
+          test -s dist/gem-knowledge/05_NURTURING/GEM_KB_NURTURING_GRADES_1-4.md
+          test -s dist/gem-knowledge/06_ASSURANCE/02_MATH_VISUAL_CONSTITUTION.md
+          find dist/gem-knowledge -type f | sort
+
+      - name: Upload ZIP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KEFAYAT_GEM_KNOWLEDGE_OMEGA
+          path: dist/gem-knowledge
+          if-no-files-found: error
+          retention-days: 30
