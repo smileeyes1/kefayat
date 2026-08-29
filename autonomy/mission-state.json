@@ -1,59 +1,42 @@
 {
   "mission_id": "KEFAYAT-AUTO-001",
   "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
-  "phase": "CONTROL_LOOP",
-  "status": "RUNNING",
+  "phase": "FINAL_AUDIT",
+  "status": "BLOCKED_EXTERNAL_EVIDENCE",
   "completed_tasks": [
     "PLAN_VALIDATED",
     "KB_VALIDATED",
     "STATE_INTEGRITY_CHECKED",
-    "RELEASE_GATE_CHECKED"
+    "RELEASE_GATE_CHECKED",
+    "AUTOMATED_REGRESSION_VALIDATED",
+    "GITHUB_PAGES_DEPLOYMENT_VALIDATED",
+    "FINAL_AUDIT_RECORDED"
   ],
   "open_gaps": [
-    "AUTONOMY_RUNTIME_ASSURANCE",
-    "RELEASE_GATE_EVIDENCE"
+    "RUNTIME_BROWSER_DEVICE_EVIDENCE",
+    "OFFLINE_CACHE_DEVICE_EVIDENCE",
+    "RTL_MATH_VISUAL_ORDER_DEVICE_EVIDENCE",
+    "FIELD_PILOT_EVIDENCE",
+    "OFFICIAL_SOURCE_VERIFICATION"
   ],
-  "blockers": [],
+  "blockers": [
+    "EXTERNAL_RUNTIME_FIELD_EVIDENCE_REQUIRED_FOR_FIELD_READY"
+  ],
   "attempt_counters": {},
-  "stagnant_cycles": 1,
-  "last_checkpoint": "2026-08-29T18:55:08Z",
+  "stagnant_cycles": 0,
+  "last_checkpoint": "2026-08-29T23:28:08+03:00",
   "artifact_identities": {
     "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1"
   },
-  "evidence_state": "UNREPORTED",
-  "claim_state": "NO CLAIM",
-  "release_state": "NOT READY",
-  "next_best_action": "WAIT_FOR_NEXT_MISSION",
+  "evidence_state": "SOFTWARE_SCOPE_PROVEN",
+  "claim_state": "GO_SOFTWARE_SCOPE_ONLY",
+  "release_state": "GO_SOFTWARE_CONDITIONAL_RUNTIME_FIELD",
+  "next_best_action": "RUN_RUNTIME_DEVICE_AND_FIELD_ACCEPTANCE",
   "history": [
     {
-      "action": "VALIDATE_PLAN",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-28T14:35:55Z"
-    },
-    {
-      "action": "VALIDATE_KB",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-28T23:42:26Z"
-    },
-    {
-      "action": "CHECK_STATE_INTEGRITY",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-29T04:19:58Z"
-    },
-    {
-      "action": "CHECK_RELEASE_GATE",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-29T11:18:29Z"
-    },
-    {
-      "action": "WAIT_FOR_NEXT_MISSION",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-29T15:44:01Z"
-    },
-    {
-      "action": "WAIT_FOR_NEXT_MISSION",
-      "status": "RUNNING",
-      "checkpoint": "2026-08-29T18:55:08Z"
+      "action": "FINAL_AUDIT",
+      "status": "GO_SOFTWARE_CONDITIONAL_RUNTIME_FIELD",
+      "checkpoint": "2026-08-29T23:28:08+03:00"
     }
   ]
 }
