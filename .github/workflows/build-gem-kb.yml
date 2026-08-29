@@ -8,6 +8,8 @@ on:
       - 'BASELINE_EXTRACTION_STATUS.md'
       - 'raw_sources/**'
       - 'knowledge/competencies.json'
+      - 'dist/GEM_KB_PROFESSIONAL/**'
+      - 'dist/KEFAYAT_GEM_KNOWLEDGE_BASE_4_SUBJECTS_GRADES_1-4.zip'
   workflow_dispatch:
 
 permissions:
@@ -34,14 +36,17 @@ jobs:
       - name: Build structured competency graph input
         run: python tools/build_competencies.py
 
+      - name: Build professional four-subject GEM package
+        run: python tools/build_professional_gem_kb.py
+
       - name: Commit generated knowledge bases
         run: |
           git config user.name 'GEM KB Builder'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add GEM_KB_*.md BASELINE_EXTRACTION_STATUS.md raw_sources/ knowledge/competencies.json
+          git add GEM_KB_*.md BASELINE_EXTRACTION_STATUS.md raw_sources/ knowledge/competencies.json dist/GEM_KB_PROFESSIONAL dist/KEFAYAT_GEM_KNOWLEDGE_BASE_4_SUBJECTS_GRADES_1-4.zip
           if git diff --cached --quiet; then
             echo 'No generated changes.'
             exit 0
           fi
-          git commit -m 'Build competency knowledge bases and graph input [skip ci]'
+          git commit -m 'Build professional four-subject GEM knowledge package [skip ci]'
           git push
