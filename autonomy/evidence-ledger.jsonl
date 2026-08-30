@@ -3,3 +3,4 @@
 {"timestamp_utc": "2026-08-29T04:19:58Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-STATE-01", "expected": "required durable state", "observed": "complete", "method": "schema invariant check", "decision": "PASS"}
 {"timestamp_utc": "2026-08-29T11:18:29Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-RELEASE-01", "expected": "release gates proven", "observed": "full autonomous development and real-mission assurance not proven", "method": "claim-scope gate", "decision": "BLOCKED"}
 {"timestamp_utc": "2026-08-30T07:30:20Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-WATCHDOG-01", "expected": "progress or bounded stop", "observed": "stagnation", "method": "progress watchdog", "decision": "SAFE_STOP"}
+{"timestamp_utc": "2026-08-30T13:18:44Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-RECOVERY-01", "expected": "safe recovery or explicit escalation", "observed": "SAFE_STOP", "method": "conservative recovery gate", "decision": "BLOCKED"}
