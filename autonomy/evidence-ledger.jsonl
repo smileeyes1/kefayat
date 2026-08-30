@@ -5,3 +5,4 @@
 {"timestamp_utc": "2026-08-30T07:30:20Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-WATCHDOG-01", "expected": "progress or bounded stop", "observed": "stagnation", "method": "progress watchdog", "decision": "SAFE_STOP"}
 {"timestamp_utc": "2026-08-30T13:18:44Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-RECOVERY-01", "expected": "safe recovery or explicit escalation", "observed": "SAFE_STOP", "method": "conservative recovery gate", "decision": "BLOCKED"}
 {"timestamp_utc": "2026-08-30T17:42:46Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-RECOVERY-01", "expected": "safe recovery or explicit escalation", "observed": "SAFE_STOP", "method": "conservative recovery gate", "decision": "BLOCKED"}
+{"timestamp_utc": "2026-08-30T20:05:32Z", "mission_id": "KEFAYAT-AUTO-001", "test_id": "AUTO-RECOVERY-01", "expected": "safe recovery or explicit escalation", "observed": "SAFE_STOP", "method": "conservative recovery gate", "decision": "BLOCKED"}
