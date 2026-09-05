@@ -73,11 +73,14 @@ jobs:
         run: |
           node --check intent/intent-engine.js
           node --check artifact/pdf-artifact-engine.js
+          node --check artifact/android-webview-bridge.js
           python tests/test_index_javascript_syntax.py
       - name: Intent Contract + Fulfillment regression
         run: python tests/test_intent_contract_engine.py
       - name: PDF artifact serializer regression
         run: python tests/test_pdf_artifact_engine.py
+      - name: Android PDF bridge contract
+        run: python tests/test_android_pdf_bridge_contract.py
       - name: Deterministic production smoke
         run: python tools/production_smoke.py
       - name: Autonomy regression
@@ -129,7 +132,7 @@ jobs:
   android-unsigned-release-build:
     needs: [smoke, browser-runtime]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -149,11 +152,12 @@ jobs:
           cp index.html ai.html sw.js manifest.webmanifest android/app/src/main/assets/
           cp knowledge/competencies.json android/app/src/main/assets/knowledge/
           cp intent/intent-engine.js android/app/src/main/assets/intent/
-          cp artifact/pdf-artifact-engine.js android/app/src/main/assets/artifact/
+          cp artifact/pdf-artifact-engine.js artifact/android-webview-bridge.js android/app/src/main/assets/artifact/
           test -s android/app/src/main/assets/index.html
           test -s android/app/src/main/assets/knowledge/competencies.json
           test -s android/app/src/main/assets/intent/intent-engine.js
           test -s android/app/src/main/assets/artifact/pdf-artifact-engine.js
+          test -s android/app/src/main/assets/artifact/android-webview-bridge.js
       - uses: android-actions/setup-android@v3
       - name: Install Android SDK 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
@@ -180,12 +184,14 @@ jobs:
           grep -Fxq 'assets/knowledge/competencies.json' "$LISTING"
           grep -Fxq 'assets/intent/intent-engine.js' "$LISTING"
           grep -Fxq 'assets/artifact/pdf-artifact-engine.js' "$LISTING"
+          grep -Fxq 'assets/artifact/android-webview-bridge.js' "$LISTING"
           unzip -p "$APK" assets/index.html > "$INDEX"
           unzip -p "$APK" assets/knowledge/competencies.json > "$KB"
           grep -Fq 'كفايات Ω' "$INDEX"
           grep -Fq 'القيادة الذاتية' "$INDEX"
           grep -Fq 'Intent Contract' "$INDEX"
           grep -Fq 'KefayatArtifact' "$INDEX"
+          unzip -p "$APK" assets/artifact/android-webview-bridge.js | grep -Fq 'KefayatAndroid.appendPdfChunk'
           python -c 'import json,sys; d=json.load(open(sys.argv[1],encoding="utf-8")); assert isinstance(d.get("records"),list) and d["records"]; print("APK knowledge records:",len(d["records"]))' "$KB"
           sha256sum "$APK" | tee android-release-sha256.txt
           printf '%s\n' "$APK" > android-release-path.txt
