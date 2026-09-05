@@ -159,7 +159,7 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10'
+          gradle-version: '8.11.1'
       - name: Build unsigned release APK for structural qualification
         run: gradle --no-daemon -p android assembleRelease
       - name: Verify unsigned release APK contents
