@@ -1,0 +1,52 @@
+name: Intent Fulfillment Regression
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'intent/**'
+      - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
+      - 'tests/test_intent_contract_engine.py'
+      - 'autonomy/test_intent_routing.py'
+      - 'quality/test_go_gate.py'
+      - 'sw.js'
+      - '.github/workflows/intent-fulfillment-regression.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'intent/**'
+      - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
+      - 'tests/test_intent_contract_engine.py'
+      - 'autonomy/test_intent_routing.py'
+      - 'quality/test_go_gate.py'
+      - 'sw.js'
+      - '.github/workflows/intent-fulfillment-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  intent-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JavaScript syntax gate
+        run: |
+          node --check intent/intent-engine.js
+          python tests/test_index_javascript_syntax.py
+      - name: Intent Contract + Fulfillment adversarial regression
+        run: python tests/test_intent_contract_engine.py
+      - name: Legacy intent-routing non-regression
+        run: python autonomy/test_intent_routing.py
+      - name: Production smoke
+        run: python tools/production_smoke.py
+      - name: Hard GO structural gate
+        run: python quality/test_go_gate.py
