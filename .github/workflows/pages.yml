@@ -15,6 +15,11 @@ on:
       - 'autonomy/**'
       - 'quality/**'
       - 'governance/**'
+      - 'state/**'
+      - 'baselines/**'
+      - 'evidence/**'
+      - 'operating/**'
+      - 'GEM_KNOWLEDGE_PACK/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -33,7 +38,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -79,6 +84,21 @@ jobs:
       - name: Run hard GO gate
         run: python quality/test_go_gate.py
 
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.55.0
+          python -m playwright install --with-deps chromium
+
+      - name: Pre-deploy browser runtime/offline gate
+        run: python quality/test_runtime_browser.py
+
+      - name: Upload pre-deploy browser evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefayat-pages-predeploy-browser-evidence
+          path: artifacts/runtime-browser
+          if-no-files-found: error
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -103,4 +123,4 @@ jobs:
           grep -q 'inferMission' /tmp/kefayat.html
           grep -q 'WISDOM' /tmp/kefayat.html
           grep -q 'القيادة الذاتية' /tmp/kefayat.html
-          echo 'RUNTIME SMOKE TEST: PASS'
+          echo 'LIVE RUNTIME SMOKE TEST: PASS'
