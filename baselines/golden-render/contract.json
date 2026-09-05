@@ -1,0 +1,20 @@
+{
+  "contract_id": "KEFAYAT-GOLDEN-RENDER-001",
+  "version": "1.0",
+  "severity": "P0",
+  "status": "PROTECTED",
+  "semantic_pattern": "A + B = R",
+  "engine_pattern": "R = B + A",
+  "final_authority": "student_eye_render",
+  "operand_identity_immutable": true,
+  "commutativity_allows_swap": false,
+  "rtl_bidi_is_authority": false,
+  "student_visible_digits": "٠١٢٣٤٥٦٧٨٩",
+  "fixtures": [
+    {"id":"G01","a":"٤","b":"٣","r":"□","engine":"□ = ٣ + ٤","student_eye":"٤ + ٣ = □"},
+    {"id":"G02","a":"٥","b":"٢","r":"□","engine":"□ = ٢ + ٥","student_eye":"٥ + ٢ = □"},
+    {"id":"G03","a":"٨","b":"١","r":"□","engine":"□ = ١ + ٨","student_eye":"٨ + ١ = □"}
+  ],
+  "required_environments": ["plain_line","table","narrow_table","card","arabic_paragraph","page_edge","page_break_proximity","multiple_equations","actual_pdf","print","all_pages"],
+  "p0_failures": ["operand_swap","equals_displaced","equals_wrapped","answer_box_displaced","engine_leak","western_digit_student_math","clipping","overlap","wrong_group_count","wrong_group_owner","answer_leak"]
+}

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "state_id": "KEFAYAT-VERIFIED-STATE-2026-09-05",
+  "authority": "governance/verified-baseline-control-plane.md",
+  "created_from_repo_commit": "470104f7798dd8483520b5da8b914405431c6e3d",
+  "current_source": {
+    "name": "Ω_PALESTINIAN_EDUCATION_PROJECT_SOURCE_v20.0_ONE_SHOT_ARTIFACT_HARDENED_RC.md",
+    "sha256": "604058a603db5e18a4cd9c19ddcb7f0fee1c0c0e93c9c865b3a6639ab8695022",
+    "status": "CANDIDATE_RC_NOT_RUNTIME_QUALIFIED"
+  },
+  "golden_render": {
+    "contract": "baselines/golden-render/contract.json",
+    "source_suite_name": "Ω_GOLDEN_RENDER_TEST_SUITE_v1.0.md",
+    "source_suite_sha256": "56feec91ad40d958324730b4f739b94424cd39be5e609d0906a1ccf1179cf758",
+    "release_evidence_name": "Ω_RELEASE_EVIDENCE_v4.2.txt",
+    "release_evidence_sha256": "d02026b30b498609266b4b002fe406a9e445201c8fddfe3497dde838d3ebaf61",
+    "source_artifact_qa": "PASS_WITHIN_STATED_SCOPE",
+    "gemini_runtime_acceptance": "NOT_PROVEN"
+  },
+  "protected_invariants": [
+    "SEMANTIC_USER_EYE_A_PLUS_B_EQUALS_R",
+    "ENGINE_REQUEST_R_EQUALS_B_PLUS_A",
+    "OPERAND_IDENTITY_IMMUTABLE",
+    "BOUND_VISUALS_MOVE_ATOMICALLY",
+    "EASTERN_ARABIC_DIGITS_STUDENT_VISIBLE",
+    "FINAL_RENDER_IS_AUTHORITY",
+    "TESTED_ARTIFACT_EQUALS_DELIVERED_ARTIFACT"
+  ],
+  "claim_scope": {
+    "source_artifact_golden_render": "VERIFIED_SOURCE",
+    "gemini_platform_runtime": "NOT_PROVEN",
+    "field_school_distribution": "NOT_PROVEN"
+  },
+  "release_decision": "NO_RUNTIME_RELEASE_CLAIM_UNTIL_PLATFORM_FIXTURE_PASSES",
+  "canonical_runtime_fixture": "انشئ درس الجمع ضمن ١٠ ك ملف pdf"
+}

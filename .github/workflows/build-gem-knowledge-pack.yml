@@ -15,12 +15,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify protected baseline first
+        run: python tests/test_verified_baseline_control_plane.py
+
       - name: Assemble curated Gemini package
         shell: bash
         run: |
           set -euo pipefail
           rm -rf dist/gem-knowledge
-          mkdir -p dist/gem-knowledge/01_CORE dist/gem-knowledge/02_MATHEMATICS dist/gem-knowledge/03_ARABIC dist/gem-knowledge/04_ISLAMIC_EDUCATION dist/gem-knowledge/05_NURTURING dist/gem-knowledge/06_ASSURANCE
+          mkdir -p dist/gem-knowledge/00_AUTHORITY dist/gem-knowledge/01_CORE dist/gem-knowledge/02_MATHEMATICS dist/gem-knowledge/03_ARABIC dist/gem-knowledge/04_ISLAMIC_EDUCATION dist/gem-knowledge/05_NURTURING dist/gem-knowledge/06_ASSURANCE
+
+          cp operating/BOOTSTRAP.md dist/gem-knowledge/00_AUTHORITY/
+          cp governance/verified-baseline-control-plane.md dist/gem-knowledge/00_AUTHORITY/
+          cp state/verified-state.json dist/gem-knowledge/00_AUTHORITY/
+          cp baselines/golden-render/contract.json dist/gem-knowledge/00_AUTHORITY/GOLDEN_RENDER_CONTRACT.json
 
           cp GEM_KNOWLEDGE_PACK/README_FOR_GEM.md dist/gem-knowledge/README.md
           cp GEM_KNOWLEDGE_PACK/00_KB_INDEX_AND_AUTHORITY.md dist/gem-knowledge/01_CORE/
@@ -31,7 +39,9 @@ jobs:
           cp GEM_KNOWLEDGE_PACK/03_WORKSHEET_ARTIFACT_SPEC.md dist/gem-knowledge/06_ASSURANCE/
           cp GEM_KNOWLEDGE_PACK/04_QUALITY_ASSURANCE_AND_RELEASE.md dist/gem-knowledge/06_ASSURANCE/
           cp GEM_KNOWLEDGE_PACK/05_ARABIC_AND_LOCALIZATION.md dist/gem-knowledge/06_ASSURANCE/
-          cp GEM_KNOWLEDGE_PACK/KEFAYAT_OMEGA_MASTER_KNOWLEDGE_AR.md dist/gem-knowledge/06_ASSURANCE/
+          cp GEM_KNOWLEDGE_PACK/KEFAYAT_OMEGA_MASTER_KNOWLEDGE_AR_v2.md dist/gem-knowledge/06_ASSURANCE/
+          cp evidence/imported/Ω_GOLDEN_RENDER_TEST_SUITE_v1.0.md dist/gem-knowledge/06_ASSURANCE/
+          cp evidence/imported/Ω_RELEASE_EVIDENCE_v4.2.txt dist/gem-knowledge/06_ASSURANCE/
 
           cp GEM_KB_MATH_GRADES_1-4.md dist/gem-knowledge/02_MATHEMATICS/
           cp GEM_KB_ARABIC_GRADES_1-4.md dist/gem-knowledge/03_ARABIC/
@@ -42,16 +52,19 @@ jobs:
           cat > dist/gem-knowledge/MANIFEST.md <<'EOF'
           # KEFAYAT Ω — Gemini Upload Manifest
 
-          Upload the contents of this directory as Gemini Gem knowledge.
+          Upload this directory as Gem knowledge.
 
-          Priority order:
-          1. Core knowledge model and competency reasoning
-          2. Subject knowledge
-          3. Assurance and visual safeguards
+          Runtime reading priority:
+          1. `00_AUTHORITY/BOOTSTRAP.md`
+          2. `00_AUTHORITY/verified-baseline-control-plane.md`
+          3. `00_AUTHORITY/verified-state.json`
+          4. `00_AUTHORITY/GOLDEN_RENDER_CONTRACT.json`
+          5. Core/domain knowledge
+          6. Assurance specifications
 
-          The package is knowledge, not a replacement for the Gem's custom instructions. Custom instructions should control behavior; these files supply domain knowledge and deterministic assurance rules.
-
-          Included domains: Mathematics, Arabic, Islamic Education, Nurturing/civic-life, plus cross-domain assurance.
+          P0 reference: ENGINE `□ = ٣ + ٤` → STUDENT-EYE `٤ + ٣ = □`.
+          The deprecated historical merged master is intentionally excluded.
+          Custom instructions control runtime behavior; these files supply domain knowledge and deterministic assurance contracts.
           EOF
 
       - name: Validate package
@@ -59,12 +72,17 @@ jobs:
         run: |
           set -euo pipefail
           test -s dist/gem-knowledge/README.md
+          test -s dist/gem-knowledge/00_AUTHORITY/verified-baseline-control-plane.md
+          test -s dist/gem-knowledge/00_AUTHORITY/verified-state.json
+          test -s dist/gem-knowledge/00_AUTHORITY/GOLDEN_RENDER_CONTRACT.json
           test -s dist/gem-knowledge/01_CORE/00_KB_INDEX_AND_AUTHORITY.md
           test -s dist/gem-knowledge/02_MATHEMATICS/GEM_KB_MATH_GRADES_1-4.md
           test -s dist/gem-knowledge/03_ARABIC/GEM_KB_ARABIC_GRADES_1-4.md
           test -s dist/gem-knowledge/04_ISLAMIC_EDUCATION/GEM_KB_ISLAMIC_EDUCATION_GRADES_1-4.md
           test -s dist/gem-knowledge/05_NURTURING/GEM_KB_NURTURING_GRADES_1-4.md
           test -s dist/gem-knowledge/06_ASSURANCE/02_MATH_VISUAL_CONSTITUTION.md
+          grep -Fq 'ENGINE REQUEST: □ = ٣ + ٤' dist/gem-knowledge/06_ASSURANCE/02_MATH_VISUAL_CONSTITUTION.md
+          ! grep -R -Fq 'Therefore the human-visible result must be exactly:' dist/gem-knowledge
           find dist/gem-knowledge -type f | sort
 
       - name: Upload ZIP artifact

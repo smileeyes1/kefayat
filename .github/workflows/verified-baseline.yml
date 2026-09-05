@@ -1,0 +1,55 @@
+name: Verified Baseline Gate
+
+on:
+  push:
+    branches: [main, 'feat/**']
+    paths:
+      - 'governance/**'
+      - 'state/**'
+      - 'baselines/**'
+      - 'evidence/**'
+      - 'operating/**'
+      - 'GEM_KNOWLEDGE_PACK/**'
+      - 'tests/test_verified_baseline_control_plane.py'
+      - '.github/workflows/verified-baseline.yml'
+  pull_request:
+    paths:
+      - 'governance/**'
+      - 'state/**'
+      - 'baselines/**'
+      - 'evidence/**'
+      - 'operating/**'
+      - 'GEM_KNOWLEDGE_PACK/**'
+      - 'tests/test_verified_baseline_control_plane.py'
+      - '.github/workflows/verified-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  protected-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify protected baseline contract
+        run: python tests/test_verified_baseline_control_plane.py
+      - name: Verify imported evidence identities
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(sha256sum 'evidence/imported/Ω_GOLDEN_RENDER_TEST_SUITE_v1.0.md' | awk '{print $1}')" = "56feec91ad40d958324730b4f739b94424cd39be5e609d0906a1ccf1179cf758"
+          test "$(sha256sum 'evidence/imported/Ω_RELEASE_EVIDENCE_v4.2.txt' | awk '{print $1}')" = "d02026b30b498609266b4b002fe406a9e445201c8fddfe3497dde838d3ebaf61"
+          echo 'IMPORTED EVIDENCE IDENTITY: PASS'
+      - name: Reject stale P0 retrieval pattern
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -Fq 'Therefore the human-visible result must be exactly:' GEM_KNOWLEDGE_PACK/02_MATH_VISUAL_CONSTITUTION.md
+          grep -Fq 'TARGET/USER-EYE: ٤ + ٣ = □' GEM_KNOWLEDGE_PACK/02_MATH_VISUAL_CONSTITUTION.md
+          grep -Fq 'ENGINE REQUEST: □ = ٣ + ٤' GEM_KNOWLEDGE_PACK/02_MATH_VISUAL_CONSTITUTION.md
+          echo 'STALE P0 RETRIEVAL PATTERN: ABSENT'

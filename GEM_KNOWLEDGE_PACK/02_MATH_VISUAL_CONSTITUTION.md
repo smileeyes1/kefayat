@@ -1,103 +1,113 @@
 # KEFAYAT Ω — MATHEMATICAL VISUAL CONSTITUTION
 
-## Status
-This document defines **mandatory knowledge constraints for human-visible mathematical artifacts**. It is specifically designed to prevent RTL/BiDi/rendering errors and number-to-quantity mismatches.
+## Status — P0 PROTECTED GOLDEN RENDER LOCK
+This document defines mandatory constraints for human-visible mathematical artifacts. The empirical Arabic rendering rule below is a protected invariant. It is not a style preference, a fallback, or permission to swap operands.
 
-## 1. Three orders are independent
-Never infer one from another:
+## 1. Separate the layers
+Never infer one layer from another:
 
-`UI DIRECTION ≠ LANGUAGE DIRECTION ≠ EDUCATIONAL ORDER ≠ MATHEMATICAL ORDER ≠ VISUAL ORDER`
+`SEMANTIC ORDER ≠ ENGINE REQUEST ORDER ≠ LANGUAGE DIRECTION ≠ UI DIRECTION ≠ FINAL STUDENT-EYE ORDER`
 
-Arabic may be RTL while a mathematical expression has an explicitly prescribed visual order. The prescribed visual order wins for the artifact.
+For an addition expression with semantic roles `operand₁=A`, `operator=+`, `operand₂=B`, `relation==`, `result=R`:
 
-## 2. Explicit visual sequence
-Any critical mathematical expression must first be represented as ordered semantic elements:
+- semantic/student-eye contract: `A + B = R`;
+- canonical engine request: `R = B + A`;
+- final rendered authority: the student must see `A + B = R`.
 
-`ELEMENT_ID → VALUE/ROLE → VISUAL_POSITION`
+For a blank result:
 
-Example required visual order:
-`[ANSWER_BOX] → [EQUALS] → [٤] → [+] → [٣]`
+`TARGET/USER-EYE: ٤ + ٣ = □`
 
-Therefore the human-visible result must be exactly:
-`□ = ٤ + ٣`
+`ENGINE REQUEST: □ = ٣ + ٤`
 
-It must **not** become:
-`٣ + ٤ = □`
-or
-`□ = ٣ + ٤`
+This mapping is the proven Golden Render Rule and is P0-protected.
 
-Mathematical equivalence is irrelevant to visual-order compliance.
+## 2. Operand identity is immutable
+`operand₁` and `operand₂` are semantic identities, not interchangeable values. Commutativity is never permission to swap them in a generated artifact.
 
-## 3. Technology must not define meaning
-Do not rely on RTL, BiDi, CSS direction, flex order, HTML DOM order, renderer behavior, PDF layout, SVG order, Canvas order, framework behavior, or library defaults to establish the intended mathematical sequence.
+If `A=٤` and `B=٣`, the required student-eye expression is `٤ + ٣ = □`. A rendered `٣ + ٤ = □` is a regression even though the arithmetic sum is equal.
 
-The intended sequence must be explicitly encoded/controlled independently of those mechanisms.
+Any image, counting group, label, badge, caption, manipulative set, or other visual attached to an operand is part of the same atomic block and moves only with that operand.
 
-## 4. Human-visible acceptance rule
+## 3. Engine request serialization — protected
+For every five-role linear addition expression use:
+
+`ENGINE = [RESULT] [EQUALS] [OPERAND₂] [OPERATOR] [OPERAND₁]`
+
+For the blank-result fixture:
+
+`□ | = | B | + | A`
+
+The implementation may use explicit geometry/token slots internally, but it must preserve this canonical request record and must not replace the Golden Render Rule with generic RTL/BiDi heuristics. A future renderer migration cannot supersede this rule unless the protected contract is explicitly re-qualified against all golden fixtures and final user-eye evidence.
+
+## 4. Final user-eye acceptance
 The final rendered artifact is the authority:
-`VISIBLE OUTPUT > SOURCE DATA > CODE > INTENTION`
 
-Inspect what a human actually sees. Internal correctness does not prove visual correctness.
+`STUDENT-EYE OUTPUT > ENGINE INTENT > SOURCE TEXT > CODE ASSUMPTION`
 
-## 5. Mathematical visual tests
-For every critical expression test:
-- `POSITION_TEST` — each element is in its intended position.
-- `ORDER_TEST` — sequence matches the prescribed visual sequence exactly.
-- `NUMBER_IDENTITY_TEST` — every numeral is the intended numeral.
-- `OPERATOR_TEST` — operator is correct and correctly positioned.
-- `EQUALS_TEST` — equality sign is correct and correctly positioned.
-- `ANSWER_BOX_TEST` — answer box is in the intended location.
-- `SPACING_TEST` — spacing does not create a false grouping or separation.
-- `VISUAL_RELATION_TEST` — a learner can immediately understand which elements belong together.
+PASS for the reference fixture requires the learner to see exactly:
 
-## 6. Critical failure protocol
-Any unintended visual reversal, movement, substitution, omission, duplication, or ambiguity is:
-`CRITICAL FAILURE → NO-GO → REPAIR → VISUAL RECHECK → RETEST → REGRESSION`
+`٤ + ٣ = □`
 
-Do not release a known critical visual defect.
+with one equals sign, on one line, between `٣` and `□`, with the answer box intact.
 
-## 7. Quantity/number binding
-For any number represented by visible objects:
-`VALUE → REQUIRED_COUNT → BOUND_GROUP → VISUAL_ELEMENTS`
+The following are P0 failures for that fixture:
+- `٣ + ٤ = □`;
+- `□ = ٣ + ٤` visible to the student;
+- `= ٤ + ٣ □`;
+- `٤ + = ٣ □`;
+- `٤ + ٣ □ =`;
+- duplicated or missing `=`;
+- equals sign or answer box on another line;
+- clipping, overlap, wrapping, hidden tokens, or answer leakage;
+- Western digits in student-visible math.
 
-The invariant is:
-`VISIBLE_COUNT = INTENDED_VALUE`
+## 5. Technology must not define meaning
+Do not delegate mathematical meaning to RTL, BiDi, CSS direction, flex order, DOM order, table direction, PDF layout, SVG defaults, Canvas defaults, or renderer behavior. These are implementation mechanisms only.
 
-and:
-`BOUND_GROUP ↔ CORRECT_NUMBER`
+The semantic model, engine request, and expected student-eye result must be explicit before rendering.
 
-A correct numeral with the wrong number of objects is a failure. Correct objects with the wrong numeral are a failure. Correct counts with unclear ownership are a failure.
+## 6. Mandatory golden fixtures
+At minimum, preserve these mappings:
 
-## 8. Per-group tests
-For every numeric visual group:
-- `VALUE_TEST`
-- `COUNT_TEST`
-- `BINDING_TEST`
-- `GROUP_BOUNDARY_TEST`
-- `VISUAL_COUNTABILITY_TEST`
-- `DUPLICATION_TEST`
-- `OMISSION_TEST`
+1. `ENGINE □ = ٣ + ٤` → `USER-EYE ٤ + ٣ = □`
+2. `ENGINE □ = ٢ + ٥` → `USER-EYE ٥ + ٢ = □`
+3. `ENGINE □ = ١ + ٨` → `USER-EYE ٨ + ١ = □`
 
-The test must be applied to **every repeated group**, not only one sample.
+Verify them in every applicable environment: plain line, table, narrow table, card, Arabic paragraph, page edge, near page break, repeated equations, final PDF, print, and all pages.
 
-## 9. Single source of truth
-Never independently type the numeral and independently draw its objects and assume they match.
+Any accepted negative mutation invalidates the verifier.
 
-Create one authoritative value, then derive:
-`VALUE → NUMERAL → VISUAL_GROUP → COUNT → LABEL/QUESTION → ANSWER`
+## 7. Quantity/number/operand binding
+For a visible counting representation:
 
-The same value must drive all representations.
+`SEMANTIC OPERAND → NUMERAL → REQUIRED COUNT → VISUAL GROUP → ACTUAL COUNT → POSITION → EVIDENCE`
 
-## 10. Example
-If the intended value is `٥`:
-- displayed numeral = `٥`;
-- required visible count = `٥`;
-- bound group contains exactly `٥` countable objects;
-- group is visually identifiable as belonging to `٥`;
-- no extra object may appear inside the group;
-- no required object may be missing.
+Required invariants:
+- `VISIBLE_COUNT = INTENDED_VALUE`;
+- each group belongs to the correct operand;
+- group boundaries are obvious;
+- decorative objects are not countable as part of the task;
+- no extra/missing objects;
+- operand order remains the semantic order seen by the learner.
 
-`٥ + ٦ objects = FAIL` even if the page otherwise looks attractive.
+Validate every repeated group, not a sample.
 
-## 11. Regression principle
-When a mismatch is discovered, fix both the artifact and the generation method. Add or strengthen a rule/test so the same failure is prevented in future artifacts.
+## 8. Number line binding
+A number-line model must preserve operand roles. If the instruction means “ابدأ من ٤ واقفز ٣”، then the student-eye equation is `٤ + ٣ = □`; do not swap it to `٣ + ٤ = □`.
+
+A demonstrated number line must show its required ticks/labels/start/jumps/end. A decorative plain line is not evidence of the journey.
+
+## 9. Eastern Arabic numerals
+Student-visible numerals use:
+
+`٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩`
+
+Appearance of Western `0-9` in student-facing mathematical content is a release failure unless a specific machine/technical payload is intentionally exempt and not learner-facing.
+
+## 10. Critical failure and regression protocol
+Any unintended reversal, operand swap, equals displacement, answer-box displacement, quantity mismatch, omission, duplication, clipping, overlap, or engine-request leakage is:
+
+`P0 → NO-GO → ROOT CAUSE → REPAIR → RE-RENDER → USER-EYE RECHECK → MUTATION TEST → REGRESSION`
+
+Do not patch only the observed instance. Strengthen the generation method and test so the same class of failure cannot silently return.
