@@ -83,8 +83,33 @@ jobs:
       - name: Delivery contract
         run: python quality/test_delivery_contract.py
 
-  android-unsigned-release-build:
+  browser-runtime:
     needs: smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild structured knowledge
+        run: python tools/build_competencies.py
+      - name: Install Playwright
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Real Chromium desktop/mobile/offline assurance
+        run: python quality/test_runtime_browser.py
+      - name: Upload browser-runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kefayat-browser-runtime-evidence
+          path: artifacts/runtime-browser
+          if-no-files-found: error
+
+  android-unsigned-release-build:
+    needs: [smoke, browser-runtime]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
