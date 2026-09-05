@@ -19,14 +19,19 @@ jobs:
           test -f knowledge/competencies.json
           test -f knowledge/schema/competency.schema.json
           test -f governance/master-omega.md
+          test -f governance/verified-baseline-control-plane.md
+          test -f state/verified-state.json
+          test -f baselines/golden-render/contract.json
+          test -f operating/BOOTSTRAP.md
           test -f tools/build_competencies.py
           test -f tests/ui_smoke.py
+          test -f tests/test_verified_baseline_control_plane.py
 
       - name: Validate JSON
         run: |
           python - <<'PY'
           import json
-          for p in ['knowledge/competencies.json','knowledge/schema/competency.schema.json']:
+          for p in ['knowledge/competencies.json','knowledge/schema/competency.schema.json','state/verified-state.json','baselines/golden-render/contract.json']:
               with open(p, encoding='utf-8') as f: json.load(f)
           print('JSON syntax: PASS')
           PY
@@ -83,6 +88,9 @@ jobs:
           grep -qi 'ACTUAL COUNT' governance/master-omega.md
           grep -qi 'Mathematical visual order' governance/master-omega.md
           echo 'Governance invariants: PASS'
+
+      - name: Protected verified-baseline regression
+        run: python tests/test_verified_baseline_control_plane.py
 
       - name: UI smoke validation
         run: python tests/ui_smoke.py
