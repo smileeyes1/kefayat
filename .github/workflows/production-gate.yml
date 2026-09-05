@@ -21,13 +21,32 @@ on:
       - 'tests/**'
       - 'android/**'
       - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'ai.html'
+      - 'sw.js'
+      - 'manifest.webmanifest'
+      - 'knowledge/**'
+      - 'tools/**'
+      - 'autonomy/**'
+      - 'quality/**'
+      - 'governance/**'
+      - 'state/**'
+      - 'baselines/**'
+      - 'evidence/**'
+      - 'operating/**'
+      - 'GEM_KNOWLEDGE_PACK/**'
+      - 'tests/**'
+      - 'android/**'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-gate
+  group: production-gate-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -64,7 +83,7 @@ jobs:
       - name: Delivery contract
         run: python quality/test_delivery_contract.py
 
-  android-release-build:
+  android-unsigned-release-build:
     needs: smoke
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -94,26 +113,39 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10'
-      - name: Build release APK
+      - name: Build unsigned release APK for structural qualification
         run: gradle --no-daemon -p android assembleRelease
-      - name: Verify release APK
+      - name: Verify unsigned release APK contents
+        shell: bash
         run: |
           set -euo pipefail
-          APK="android/app/build/outputs/apk/release/app-release.apk"
+          mapfile -t APKS < <(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print | sort)
+          test "${#APKS[@]}" -eq 1
+          APK="${APKS[0]}"
           test -s "$APK"
-          unzip -Z1 "$APK" | grep -Fx 'assets/index.html'
-          unzip -Z1 "$APK" | grep -Fx 'assets/knowledge/competencies.json'
-          unzip -p "$APK" assets/index.html | grep -q 'كفايات Ω'
-          unzip -p "$APK" assets/index.html | grep -q 'القيادة الذاتية'
-          unzip -p "$APK" assets/knowledge/competencies.json | python -c 'import json,sys; d=json.load(sys.stdin); assert isinstance(d.get("records"),list) and d["records"]; print("APK knowledge records:",len(d["records"]))'
+          echo "APK=$APK"
+
+          LISTING="$(mktemp)"
+          INDEX="$(mktemp)"
+          KB="$(mktemp)"
+          unzip -Z1 "$APK" > "$LISTING"
+          grep -Fxq 'assets/index.html' "$LISTING"
+          grep -Fxq 'assets/knowledge/competencies.json' "$LISTING"
+          unzip -p "$APK" assets/index.html > "$INDEX"
+          unzip -p "$APK" assets/knowledge/competencies.json > "$KB"
+          grep -Fq 'كفايات Ω' "$INDEX"
+          grep -Fq 'القيادة الذاتية' "$INDEX"
+          python -c 'import json,sys; d=json.load(open(sys.argv[1],encoding="utf-8")); assert isinstance(d.get("records"),list) and d["records"]; print("APK knowledge records:",len(d["records"]))' "$KB"
           sha256sum "$APK" | tee android-release-sha256.txt
-          echo 'RELEASE APK CONTENTS: PASS'
-      - name: Upload release APK and checksum
+          printf '%s\n' "$APK" > android-release-path.txt
+          echo 'UNSIGNED RELEASE APK STRUCTURAL CONTENTS: PASS'
+      - name: Upload unsigned release APK and qualification evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kefayat-release-apk
+          name: kefayat-unsigned-release-apk
           path: |
-            android/app/build/outputs/apk/release/app-release.apk
+            android/app/build/outputs/apk/release/*.apk
             android-release-sha256.txt
-          if-no-files-found: warn
+            android-release-path.txt
+          if-no-files-found: error
