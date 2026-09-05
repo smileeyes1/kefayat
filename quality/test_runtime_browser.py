@@ -112,7 +112,10 @@ def validate_rendered_pdf(path: Path, label: str) -> dict:
     assert pdfinfo.returncode == 0, (label, pdfinfo.stderr)
     pages = re.search(r"^Pages:\s+(\d+)", pdfinfo.stdout, re.MULTILINE)
     assert pages and int(pages.group(1)) == 2, (label, pdfinfo.stdout)
-    assert re.search(r"^Page size:\s+595(?:\.\d+)? x 842(?:\.\d+)? pts", pdfinfo.stdout, re.MULTILINE), (label, pdfinfo.stdout)
+    size = re.search(r"^Page size:\s+([0-9.]+) x ([0-9.]+) pts", pdfinfo.stdout, re.MULTILINE)
+    assert size, (label, pdfinfo.stdout)
+    page_w, page_h = float(size.group(1)), float(size.group(2))
+    assert abs(page_w - 595.28) < 1.0 and abs(page_h - 841.89) < 1.0, (label, page_w, page_h, pdfinfo.stdout)
 
     prefix = OUT / f"{label}-render"
     rendered = subprocess.run(["pdftoppm", "-png", "-r", "100", str(path), str(prefix)], text=True, capture_output=True, check=False)
@@ -124,7 +127,7 @@ def validate_rendered_pdf(path: Path, label: str) -> dict:
         w, h = png_size(p)
         assert w >= 800 and h >= 1100 and p.stat().st_size > 20_000, (p, w, h, p.stat().st_size)
         page_evidence.append({"file": p.name, "width": w, "height": h, "sha256": sha256(p), "bytes": p.stat().st_size})
-    return {"file": path.name, "sha256": sha256(path), "bytes": len(data), "pdfinfo": pdfinfo.stdout, "rendered_pages": page_evidence}
+    return {"file": path.name, "sha256": sha256(path), "bytes": len(data), "page_width_pt": page_w, "page_height_pt": page_h, "pdfinfo": pdfinfo.stdout, "rendered_pages": page_evidence}
 
 
 def exercise_canonical_intent(page, label: str) -> dict:
