@@ -12,6 +12,7 @@ def main() -> None:
         ROOT / 'README.md',
         ROOT / 'index.html',
         ROOT / 'intent' / 'intent-engine.js',
+        ROOT / 'artifact' / 'pdf-artifact-engine.js',
         ROOT / 'knowledge' / 'competencies.json',
         ROOT / 'governance' / 'WISDOM_GOVERNANCE.md',
         ROOT / 'governance' / 'INTENT_FULFILLMENT_CONTRACT.md',
@@ -23,6 +24,7 @@ def main() -> None:
         ROOT / 'autonomy' / 'test_intent_routing.py',
         ROOT / 'autonomy' / 'test_wisdom_governance.py',
         ROOT / 'tests' / 'test_intent_contract_engine.py',
+        ROOT / 'tests' / 'test_pdf_artifact_engine.py',
     ]
     for p in required:
         assert p.exists() and p.stat().st_size > 0, f'missing release evidence: {p}'
@@ -44,17 +46,21 @@ def main() -> None:
         assert marker.lower() in continuity.lower(), f'continuity contract marker missing: {marker}'
     for marker in ('BUILT', 'TESTED', 'DEPLOYED', 'RUNTIME-VERIFIED', 'FIELD-READY', 'Critical acceptance gates', 'Final GO rule'):
         assert marker.lower() in professional.lower(), f'professional release marker missing: {marker}'
-    for marker in ('USER INTENT', 'INTENT CONTRACT', 'Acceptance Oracle', 'GENERATED', 'FULFILLED', 'actual PDF', 'Zero-burden'):
+    for marker in ('USER INTENT', 'INTENT CONTRACT', 'Acceptance Oracle', 'GENERATED', 'FULFILLED', 'actual PDF', 'Zero-burden', 'Cross-Domain contamination'):
         assert marker.lower() in intent.lower(), f'intent fulfillment marker missing: {marker}'
 
     html = (ROOT / 'index.html').read_text(encoding='utf-8')
     assert len(html) > 1000, 'application shell unexpectedly small'
-    for marker in ('كفايات Ω', 'inferMission', 'القيادة الذاتية', 'Intent Contract', 'Acceptance Oracle', 'KefayatIntent'):
+    for marker in ('كفايات Ω', 'inferMission', 'القيادة الذاتية', 'Intent Contract', 'Acceptance Oracle', 'KefayatIntent', 'KefayatArtifact', './artifact/pdf-artifact-engine.js'):
         assert marker in html, f'critical UI marker missing: {marker}'
 
     engine = (ROOT / 'intent' / 'intent-engine.js').read_text(encoding='utf-8')
     for marker in ('compileContract', 'retrieveEvidence', 'contractGate', 'buildPlan', 'acceptanceOracle'):
         assert marker in engine, f'intent engine marker missing: {marker}'
+
+    artifact = (ROOT / 'artifact' / 'pdf-artifact-engine.js').read_text(encoding='utf-8')
+    for marker in ('serializeImagePdf', 'buildLessonPdf', 'semanticMath', 'EXPLICIT_TOKEN_GEOMETRY_TO_CANVAS_RASTER_PDF'):
+        assert marker in artifact, f'PDF artifact engine marker missing: {marker}'
 
     delivery = (ROOT / 'quality' / 'test_delivery_contract.py').read_text(encoding='utf-8')
     assert 'DIRECT DELIVERY CONTRACT' in delivery, 'direct delivery contract invalid'
