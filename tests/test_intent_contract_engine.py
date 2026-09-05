@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ENGINE=ROOT/'intent'/'intent-engine.js'
 CONSTITUTION=ROOT/'governance'/'INTENT_FULFILLMENT_CONTRACT.md'
+KB=ROOT/'knowledge'/'competencies.json'
 
 
 def run_node(source:str)->dict:
@@ -19,6 +20,7 @@ def run_node(source:str)->dict:
 def main()->None:
     assert ENGINE.is_file() and ENGINE.stat().st_size>5000
     assert CONSTITUTION.is_file() and CONSTITUTION.stat().st_size>1500
+    assert KB.is_file() and KB.stat().st_size>1000
     text=ENGINE.read_text(encoding='utf-8')
     for marker in ('compileContract','retrieveEvidence','contractGate','buildPlan','acceptanceOracle','P0_GOLDEN_RENDER','PRESERVE_VERIFIED_BASELINES'):
         assert marker in text, marker
@@ -30,7 +32,7 @@ const records=[
  {id:'G2-MATH-0001',grade:2,subject:'mathematics',main_competency:'الجمع',criterion:'الجمع ضمن ١٨',source_text:'الجمع والطرح ضمن ١٨'},
  {id:'G2-ARABIC-0001',grade:2,subject:'arabic',main_competency:'القراءة',criterion:'قراءة نص',source_text:'قراءة نص قصير'}
 ];
-const a=E.compileContract({text:'انشئ درس الجمع ضمن ١٠ كملف pdf'},records,{role:'teacher'});
+const a=E.compileContract({text:'انشئ درس الجمع ضمن ١٠ كملف pdf'},records,{role:'teacher',education_system:'palestinian'});
 const ar=E.retrieveEvidence(a,records);
 const ag=E.contractGate(a,ar);
 const ap=E.buildPlan(a,ar);
@@ -39,13 +41,19 @@ const passed=E.acceptanceOracle(a,ar,{actual_pdf_exists:true,actual_pdf_opens:tr
 const b=E.compileContract({text:'حضّر درس قراءة للصف الثاني',subject:'arabic'},records,{role:'teacher'});
 const c=E.compileContract({text:'اعمل درس'},[],{role:'teacher'});
 const d=E.compileContract({text:'عدّل الملف دون كسر القاعدة المثبتة'},records,{role:'teacher'});
-console.log(JSON.stringify({a,ar:ar.map(x=>x.id),ag,ap,blocked,passed,b,c,d}));
+const falseMath=E.compileContract({text:'أنشئ ملف PDF عدد صفحاته ٢'},records,{role:'teacher'});
+const realKb=require('./knowledge/competencies.json');
+const real=E.compileContract({text:'أنشئ درس الجمع ضمن ١٠ كملف PDF'},realKb.records,{role:'teacher',education_system:'palestinian'});
+const realRefs=E.retrieveEvidence(real,realKb.records);
+console.log(JSON.stringify({a,ar:ar.map(x=>x.id),ag,ap,blocked,passed,b,c,d,falseMath,real,realRefs:realRefs.map(x=>({id:x.id,grade:x.grade,subject:x.subject}))}));
 '''
     r=run_node(js)
     a=r['a']
     assert a['subject']=='mathematics', a
     assert a['grade']==1, a
     assert a['artifact_type']=='pdf' and a['task_type']=='lesson', a
+    assert a['context_scope']=='PALESTINIAN_EDUCATION',a
+    assert 'PALESTINIAN_CONTEXT' in a['hard_requirements'],a
     assert 'DELIVER_ACTUAL_PDF' in a['hard_requirements']
     assert 'P0_GOLDEN_RENDER' in a['hard_requirements']
     assert 'ENGINE_REQUEST_R_EQUALS_B_PLUS_A' in a['protected_invariants']
@@ -58,9 +66,18 @@ console.log(JSON.stringify({a,ar:ar.map(x=>x.id),ag,ap,blocked,passed,b,c,d}));
     assert r['c']['grade'] is None and 'grade' in r['c']['unresolved'], r['c']
     assert r['c']['subject'] is None, r['c']
     assert 'PRESERVE_VERIFIED_BASELINES' in r['d']['hard_requirements'] and 'NO_REGRESSION' in r['d']['hard_requirements'], r['d']
+    assert r['falseMath']['subject'] is None, r['falseMath']
+
+    # The real shipped KB must resolve the canonical acceptance fixture without an arbitrary Grade-1 fallback.
+    real=r['real']
+    assert real['subject']=='mathematics',real
+    assert real['grade']==1,real
+    assert real['grade_resolution']['source']=='evidence-inference',real
+    assert real['artifact_type']=='pdf' and real['ready_for_execution'] is True,real
+    assert r['realRefs'] and all(x['grade']==1 and x['subject']=='mathematics' for x in r['realRefs']),r['realRefs']
 
     gov=CONSTITUTION.read_text(encoding='utf-8')
-    for marker in ('USER INTENT → INTENT CONTRACT','GENERATED` is never equivalent to `FULFILLED','actual PDF','٤ + ٣ = □','□ = ٣ + ٤','Zero-burden'):
+    for marker in ('USER INTENT → INTENT CONTRACT','GENERATED` is never equivalent to `FULFILLED','actual PDF','٤ + ٣ = □','□ = ٣ + ٤','Zero-burden','Cross-Domain contamination','عدد الصفحات'):
         assert marker in gov, marker
     print('INTENT CONTRACT + FULFILLMENT REGRESSION: PASS')
 
