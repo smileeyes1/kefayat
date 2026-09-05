@@ -10,7 +10,8 @@
     "AUTOMATED_REGRESSION_VALIDATED",
     "GITHUB_PAGES_DEPLOYMENT_VALIDATED",
     "FINAL_AUDIT_RECORDED",
-    "BASELINE_CONTROL_PLANE_VALIDATED"
+    "BASELINE_CONTROL_PLANE_VALIDATED",
+    "RELEASE_GATE_CHECKED"
   ],
   "open_gaps": [
     "RUNTIME_BROWSER_DEVICE_EVIDENCE",
@@ -24,15 +25,15 @@
   ],
   "attempt_counters": {},
   "stagnant_cycles": 0,
-  "last_checkpoint": "2026-09-05T17:41:29Z",
+  "last_checkpoint": "2026-09-05T18:08:41Z",
   "artifact_identities": {
     "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1",
     "control_plane_fingerprint": "6523a428cb887e5237556afbeec50a227025379035830c4a8eb2caf5ec31854b"
   },
   "evidence_state": "VERIFIED_SOURCE_SCOPE",
-  "claim_state": "GO_SOFTWARE_SCOPE_ONLY",
-  "release_state": "GO_SOFTWARE_CONDITIONAL_RUNTIME_FIELD",
-  "next_best_action": "VALIDATE_BASELINE_CONTROL_PLANE",
+  "claim_state": "SOURCE BASELINE VERIFIED; PLATFORM RUNTIME NOT PROVEN",
+  "release_state": "CONTROL_PLANE_READY__PLATFORM_RUNTIME_NOT_PROVEN",
+  "next_best_action": "CHECK_RELEASE_GATE",
   "history": [
     {
       "action": "FINAL_AUDIT",
@@ -268,6 +269,11 @@
       "action": "VALIDATE_BASELINE_CONTROL_PLANE",
       "status": "RUNNING",
       "checkpoint": "2026-09-05T17:41:29Z"
+    },
+    {
+      "action": "CHECK_RELEASE_GATE",
+      "status": "RUNNING",
+      "checkpoint": "2026-09-05T18:08:41Z"
     }
   ]
 }
