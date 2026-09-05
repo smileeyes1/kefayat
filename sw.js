@@ -1,5 +1,5 @@
-const CACHE = 'kefayat-shell-v1';
-const CORE = ['./', './index.html', './manifest.webmanifest'];
+const CACHE = 'kefayat-shell-v2-intent';
+const CORE = ['./', './index.html', './intent/intent-engine.js', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
@@ -20,7 +20,7 @@ self.addEventListener('fetch', event => {
           caches.open(CACHE).then(cache => cache.put(req, copy));
         }
         return res;
-      }).catch(() => cached || caches.match('./index.html'));
+      }).catch(() => cached || (req.mode === 'navigate' ? caches.match('./index.html') : Promise.reject(new Error('offline cache miss'))));
       return cached || network;
     })
   );
