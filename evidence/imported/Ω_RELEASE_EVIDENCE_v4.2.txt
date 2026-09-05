@@ -1,0 +1,31 @@
+Ω RELEASE EVIDENCE v4.2 — PROVEN GOLDEN RENDER LOCK
+
+STATUS: RELEASE CANDIDATE / USER-EYE QA PASSED FOR SOURCE ARTIFACTS
+
+HARD LOCK:
+- Semantic target: A + B = □
+- Generator request: □ = B + A
+- Reference: target ٤ + ٣ = □ => request □ = ٣ + ٤
+- Operand identities are immutable; commutativity is NOT permission to swap them.
+- RTL/BiDi is NOT the rendering authority.
+- Visual/label attachments move atomically with their operand.
+- Final authority: rendered artifact as seen by the Arabic student.
+
+QA EXECUTED:
+- DOCX render: PASS (Core 3 pages; Learning 3 pages; Arena 1 page).
+- User-eye inspection of all rendered pages: PASS; no visible clipping/overlap detected.
+- Golden request row physically renders as □ = ٣ + ٤ in source/arena.
+- Final student-eye contract is explicitly enforced and mutation-tested.
+
+IMPORTANT: platform-specific Gemini behavior still requires an actual Gem acceptance run; no claim of platform verification is made here.
+
+SHA256:
+{
+  "Ω_TEACHER_OS_CORE_SOURCE_v4.2_PROVEN_GOLDEN_RENDER_LOCK.docx": "467aa1c30dfbea96f4064e8e2a8e709cf375b4c947a8802cb0dffb8c604c73dc",
+  "Ω_TEACHER_OS_CORE_SOURCE_v4.2_PROVEN_GOLDEN_RENDER_LOCK.pdf": "1681f3929802dfefbbc727db1acbee783496c57be9e690e6886d7d58653f6771",
+  "Ω_VISUAL_MATH_ARENA_v4.2_PROVEN_GOLDEN_RENDER_ORACLE.docx": "86d21099e6648d18a40ce075873ad65b3edf6443db0c45197d12b89603636ade",
+  "Ω_VISUAL_MATH_ARENA_v4.2_PROVEN_GOLDEN_RENDER_ORACLE.pdf": "8f27eea00ee89fa6e27b725c48c67d53e4914c251cf34d8e5e902ced5fc52566",
+  "Ω_LEARNING_MASTERY_SOURCE_G2_v4.2_PROVEN_GOLDEN_RENDER_LOCK.pdf": "760efc05a94fdb4250eddd8a99f80d507b17a4439fddad52293e8363b97a8614",
+  "GEMINI_CUSTOM_INSTRUCTIONS_PALESTINE_TEACHER_OS_v4.2.txt": "82373d6860a299a0de6b44f8c81a8079cc93833e1f88eadb5acda1396b929ebb",
+  "Ω_LEARNING_MASTERY_SOURCE_G2_v4.2_PROVEN_GOLDEN_RENDER_LOCK.docx": "e6f6eaefefd3895d6782eeb2fb68ee03025bbc09a33987bcef54bd4d6bf3ebc0"
+}
