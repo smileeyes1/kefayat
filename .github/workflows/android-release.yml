@@ -9,6 +9,7 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -18,19 +19,40 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
       - name: Build competency graph
         run: python tools/build_competencies.py
+      - name: Validate intent and artifact engines before signing
+        run: |
+          node --check intent/intent-engine.js
+          node --check artifact/pdf-artifact-engine.js
+          node --check artifact/android-webview-bridge.js
+          python tests/test_intent_contract_engine.py
+          python tests/test_pdf_artifact_engine.py
+          python tests/test_index_javascript_syntax.py
+          python tests/test_android_pdf_bridge_contract.py
       - name: Stage production workspace
         run: |
-          mkdir -p android/app/src/main/assets/knowledge
+          set -euo pipefail
+          rm -rf android/app/src/main/assets
+          mkdir -p android/app/src/main/assets/knowledge android/app/src/main/assets/intent android/app/src/main/assets/artifact
           cp index.html ai.html sw.js manifest.webmanifest android/app/src/main/assets/
           cp knowledge/competencies.json android/app/src/main/assets/knowledge/
+          cp intent/intent-engine.js android/app/src/main/assets/intent/
+          cp artifact/pdf-artifact-engine.js artifact/android-webview-bridge.js android/app/src/main/assets/artifact/
+          test -s android/app/src/main/assets/index.html
+          test -s android/app/src/main/assets/knowledge/competencies.json
+          test -s android/app/src/main/assets/intent/intent-engine.js
+          test -s android/app/src/main/assets/artifact/pdf-artifact-engine.js
+          test -s android/app/src/main/assets/artifact/android-webview-bridge.js
       - uses: android-actions/setup-android@v3
       - name: Install Android SDK 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10'
+          gradle-version: '8.11.1'
       - name: Restore release keystore
         env:
           KEYSTORE_B64: ${{ secrets.KEFAYAT_KEYSTORE_B64 }}
@@ -53,10 +75,22 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose android/app/build/outputs/apk/release/app-release.apk
       - name: Verify production workspace is packaged
         run: |
-          test -s android/app/src/main/assets/index.html
-          test -s android/app/src/main/assets/knowledge/competencies.json
+          set -euo pipefail
+          APK=android/app/build/outputs/apk/release/app-release.apk
+          unzip -Z1 "$APK" | grep -Fx 'assets/index.html'
+          unzip -Z1 "$APK" | grep -Fx 'assets/knowledge/competencies.json'
+          unzip -Z1 "$APK" | grep -Fx 'assets/intent/intent-engine.js'
+          unzip -Z1 "$APK" | grep -Fx 'assets/artifact/pdf-artifact-engine.js'
+          unzip -Z1 "$APK" | grep -Fx 'assets/artifact/android-webview-bridge.js'
+          unzip -p "$APK" assets/index.html | grep -Fq 'Intent Contract'
+          unzip -p "$APK" assets/index.html | grep -Fq 'KefayatArtifact'
+          unzip -p "$APK" assets/artifact/android-webview-bridge.js | grep -Fq 'KefayatAndroid.appendPdfChunk'
       - name: Verify AAB exists
         run: test -s android/app/build/outputs/bundle/release/app-release.aab
+      - name: Record signed artifact identities
+        run: |
+          sha256sum android/app/build/outputs/apk/release/app-release.apk | tee android-signed-apk-sha256.txt
+          sha256sum android/app/build/outputs/bundle/release/app-release.aab | tee android-signed-aab-sha256.txt
       - name: Upload signed release artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -64,6 +98,8 @@ jobs:
           path: |
             android/app/build/outputs/apk/release/app-release.apk
             android/app/build/outputs/bundle/release/app-release.aab
+            android-signed-apk-sha256.txt
+            android-signed-aab-sha256.txt
           if-no-files-found: error
       - name: Cleanup signing material
         if: always()

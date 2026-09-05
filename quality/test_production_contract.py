@@ -9,12 +9,14 @@ INDEX = ROOT / "index.html"
 AI = ROOT / "ai.html"
 MANIFEST = ROOT / "manifest.webmanifest"
 SW = ROOT / "sw.js"
+INTENT = ROOT / "intent" / "intent-engine.js"
+PDF_ENGINE = ROOT / "artifact" / "pdf-artifact-engine.js"
 KB = ROOT / "knowledge" / "competencies.json"
 RAW_NURTURING_1 = ROOT / "raw_sources" / "nurturing_grade_1.txt"
 
 
 def main() -> None:
-    for p, minimum in ((INDEX, 1000), (AI, 1000), (MANIFEST, 100), (SW, 500), (KB, 1000), (RAW_NURTURING_1, 500)):
+    for p, minimum in ((INDEX, 1000), (AI, 1000), (MANIFEST, 100), (SW, 500), (INTENT, 5000), (PDF_ENGINE, 5000), (KB, 1000), (RAW_NURTURING_1, 500)):
         assert p.exists(), f"required artifact missing: {p}"
         assert p.stat().st_size >= minimum, f"required artifact too small: {p}"
 
@@ -38,15 +40,22 @@ def main() -> None:
 
     ui = INDEX.read_text(encoding="utf-8")
     ai = AI.read_text(encoding="utf-8")
+    intent = INTENT.read_text(encoding="utf-8")
+    pdf = PDF_ENGINE.read_text(encoding="utf-8")
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     sw = SW.read_text(encoding="utf-8")
 
-    for marker in ("inferMission", "retrieveMission", "wisdomGate", "Cross-Domain", "WISDOM", "localStorage"):
+    for marker in ("inferMission", "retrieveMission", "wisdomGate", "Cross-Domain", "WISDOM", "localStorage", "Intent Contract", "Acceptance Oracle", "KefayatArtifact"):
         assert marker in ui, f"core UI contract missing: {marker}"
+    for marker in ("compileContract", "inferGradeFromEvidence", "P0_GOLDEN_RENDER", "acceptanceOracle"):
+        assert marker in intent, f"intent engine contract missing: {marker}"
+    for marker in ("serializeImagePdf", "buildLessonPdf", "semanticMath", "EXPLICIT_TOKEN_GEOMETRY_TO_CANVAS_RASTER_PDF"):
+        assert marker in pdf, f"PDF engine contract missing: {marker}"
     for marker in ("Gemini", "localStorage", "Free-First", "لا خادم مدفوع"):
         assert marker in ai, f"AI safety/free-first contract missing: {marker}"
     assert manifest.get("dir") == "rtl" and manifest.get("lang") == "ar", "manifest locale contract broken"
     assert "catch" in sw and "index.html" in sw, "offline fallback contract missing"
+    assert "./intent/intent-engine.js" in sw and "./artifact/pdf-artifact-engine.js" in sw, "offline fulfillment engines not precached"
 
     print("PRODUCTION CONTRACT: PASS")
 
