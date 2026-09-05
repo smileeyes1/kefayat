@@ -1,6 +1,6 @@
-/* KEFAYAT Ω Intent Contract + Fulfillment Engine v1.0
+/* KEFAYAT Ω Intent Contract + Fulfillment Engine v1.1
  * Deterministic, local-first intent compiler. No network dependency.
- * Deep generation may be delegated to an AI provider only after this contract is fixed.
+ * Deep generation may be delegated to an AI provider only after this contract is frozen.
  */
 (function(root,factory){
   const api=factory();
@@ -10,7 +10,7 @@
   'use strict';
 
   const SUBJECTS={
-    mathematics:['رياض','عدد','اعداد','جمع','طرح','ضرب','قسمة','كمية','عد','رقم','هندسة','قياس','مساله','مسألة','كسور','اشكال','أشكال'],
+    mathematics:['رياض','جمع','طرح','ضرب','قسمة','كمية','هندسة','قياس','مساله','مسألة','كسور','اشكال','أشكال'],
     arabic:['حرف','قراءة','قراءه','كتابة','كتابه','استماع','تحدث','لغة','لغه','نص','هجاء','املاء','إملاء','قصة','قصه'],
     islamic_education:['وضوء','صلاة','صلاه','قران','قرآن','حديث','سيرة','سيره','اسلام','إسلام','عبادة','عباده','توحيد','فقه'],
     nurturing:['حواس','اسرة','اسرتي','اسره','بيئة','بيئه','حيوان','نبات','فصول','مواطن','مدرسة','مدرسه','مجتمع','فلسطين','وطن','حياة','حياه']
@@ -29,6 +29,7 @@
     ['lesson_plan',/تحضير|خطة\s*درس|خطه\s*درس/i],
     ['text',/نص|صياغة|صياغه/i]
   ];
+  const STOP_TERMS=new Set(['انشئ','اعمل','اريد','جهز','اصنع','اكتب','صمم','ملف','درس','كملف','بصيغه','بصيغة','للطالب','للمعلم']);
 
   function normalizeArabic(value){
     return String(value??'').normalize('NFKC')
@@ -40,7 +41,11 @@
     return normalizeArabic(value).replace(/[٠-٩]/g,d=>String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
   }
   function tokenize(value){
-    return normalizeArabic(value).split(/[^\p{L}\p{N}]+/u).filter(x=>x.length>1);
+    return normalizeArabic(value).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  }
+  function isNumericToken(t){return /^[٠-٩0-9]+$/.test(t)}
+  function evidenceTerms(value){
+    return tokenize(value).filter(t=>!STOP_TERMS.has(t)&&(t.length>2||isNumericToken(t)));
   }
   function uniq(xs){return [...new Set(xs.filter(Boolean))]}
   function hit(q,needles){return needles.reduce((n,x)=>n+(q.includes(normalizeArabic(x))?1:0),0)}
@@ -49,10 +54,15 @@
     if(explicit&&explicit!=='all'&&SUBJECTS[explicit]) return {value:explicit,source:'explicit',confidence:1,scores:{[explicit]:100}};
     const q=normalizeArabic(text),scores={};
     for(const [subject,words] of Object.entries(SUBJECTS)) scores[subject]=hit(q,words)*8;
+    // Generic words such as "عدد" and "رقم" are too ambiguous on their own (e.g. page count).
+    // Treat them as mathematics only in educational-number contexts.
+    if(/(?:درس|تعلم|تعليم|تمرين|تمارين)\s+(?:ال)?عدد/.test(q)||/(?:ال)?عدد\s*[٠-٩0-9]+/.test(q)||/الاعداد|اعداد\s+(?:ضمن|حتي|حتى)/.test(q)) scores.mathematics+=10;
+    if(/عد\s+(?:الاشياء|الاشكال|العناصر)|العد\s+(?:ضمن|حتي|حتى)/.test(q)) scores.mathematics+=8;
     const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
     if(!ranked[0]||ranked[0][1]===0) return {value:null,source:'unresolved',confidence:0,scores};
     const margin=ranked[0][1]-(ranked[1]?.[1]||0);
-    return {value:ranked[0][0],source:'lexical',confidence:Math.min(0.95,0.62+margin/32),scores};
+    if(margin===0) return {value:null,source:'ambiguous',confidence:0.4,scores};
+    return {value:ranked[0][0],source:'lexical',confidence:Math.min(0.96,0.62+margin/32),scores};
   }
 
   function explicitGrade(text,gradeHint){
@@ -69,19 +79,27 @@
 
   function inferGradeFromEvidence(text,subject,records){
     if(!subject||!Array.isArray(records)||!records.length) return {value:null,source:'unresolved',confidence:0,scores:{}};
-    const terms=tokenize(text).filter(t=>t.length>2&&!['انشئ','اعمل','اريد','ملف','درس','كملف','بصيغه'].includes(t));
-    const scores={1:0,2:0,3:0,4:0},hits={1:0,2:0,3:0,4:0};
+    const terms=evidenceTerms(text);
+    const scores={1:0,2:0,3:0,4:0},hits={1:0,2:0,3:0,4:0},best_record_ids={1:null,2:null,3:null,4:null};
     for(const r of records){
-      if(r?.subject!==subject||![1,2,3,4].includes(Number(r?.grade))) continue;
+      const grade=Number(r?.grade);
+      if(r?.subject!==subject||![1,2,3,4].includes(grade)) continue;
       const hay=normalizeArabic([r.id,r.main_competency,r.sub_competency,r.domain,r.criterion,r.source_text].join(' '));
-      let score=0;
-      for(const t of terms) if(hay.includes(t)){score+=Math.min(12,3+t.length);hits[r.grade]++;}
-      if(score>0) scores[r.grade]+=score;
+      let score=0,matched=0;
+      for(const t of terms){
+        if(!hay.includes(t)) continue;
+        matched++;
+        score+=isNumericToken(t)?20:Math.min(12,3+t.length);
+      }
+      // Compare the strongest matching evidence record per grade. This avoids a grade
+      // winning merely because it contains more source records than another grade.
+      if(score>scores[grade]){scores[grade]=score;hits[grade]=matched;best_record_ids[grade]=r.id||null;}
     }
     const ranked=Object.entries(scores).map(([g,s])=>[Number(g),s]).sort((a,b)=>b[1]-a[1]);
     const [best,second]=[ranked[0],ranked[1]||[0,0]];
-    if(!best||best[1]===0||best[1]<second[1]+5) return {value:null,source:'ambiguous-evidence',confidence:0.35,scores,hits};
-    return {value:best[0],source:'evidence-inference',confidence:Math.min(0.92,0.60+(best[1]-second[1])/40),scores,hits};
+    const margin=best?.[1]-(second?.[1]||0);
+    if(!best||best[1]===0||margin<5) return {value:null,source:'ambiguous-evidence',confidence:0.35,scores,hits,best_record_ids};
+    return {value:best[0],source:'evidence-inference',confidence:Math.min(0.94,0.62+margin/45),scores,hits,best_record_ids};
   }
 
   function detectArtifact(text){
@@ -92,8 +110,8 @@
     const q=normalizeArabic(text);
     if(/عدل|تعديل|اصلح|اصلاح|حدث|تحديث|طور|تطوير|حسن|تحسين/.test(q)) return 'modify';
     if(/راجع|مراجعه|دقق|تدقيق|افحص|تحقق|قيم|تقييم/.test(q)) return 'review';
-    if(/درس|تحضير|خطة درس|خطه درس|تعليم/.test(q)) return 'lesson';
     if(/ورقة عمل|ورقه عمل|تدريب|تمارين/.test(q)) return 'worksheet';
+    if(/درس|تحضير|خطة درس|خطه درس|تعليم/.test(q)) return 'lesson';
     if(/انشئ|اصنع|جهز|اكتب|صمم/.test(q)) return 'create';
     return 'mission';
   }
@@ -104,7 +122,7 @@
     return context?.role||'teacher';
   }
 
-  function deriveRequirements(text,artifact,subject,task){
+  function deriveRequirements(text,artifact,subject,task,context={}){
     const q=normalizeArabic(text),hard=[],preferences=[];
     if(artifact==='pdf') hard.push('DELIVER_ACTUAL_PDF','PDF_OPENS','TESTED_ARTIFACT_EQUALS_DELIVERED_ARTIFACT');
     if(artifact==='docx') hard.push('DELIVER_ACTUAL_DOCX','TESTED_ARTIFACT_EQUALS_DELIVERED_ARTIFACT');
@@ -113,7 +131,7 @@
     if(/عربي|العربيه|rtl|يمين/.test(q)||['mathematics','arabic','islamic_education','nurturing'].includes(subject)) hard.push('ARABIC_NATIVE','RTL_INTERFACE');
     if(/طباع|اطبع|جاهز للطباعة|جاهزه للطباعه/.test(q)||['pdf','worksheet','lesson_plan'].includes(artifact)) hard.push('PRINT_READY');
     if(/هاتف|موبايل|جوال/.test(q)) hard.push('MOBILE_USABLE');
-    if(/فلسطين|فلسطيني|المنهاج الفلسطيني|المنهج الفلسطيني/.test(q)) hard.push('PALESTINIAN_CONTEXT');
+    if(context.education_system==='palestinian'||/فلسطين|فلسطيني|المنهاج الفلسطيني|المنهج الفلسطيني/.test(q)) hard.push('PALESTINIAN_CONTEXT');
     if(/دون كسر|لا تغير|لا تغيّر|حافظ|ثبت|مثبت|baseline|golden/.test(q)||task==='modify') hard.push('PRESERVE_VERIFIED_BASELINES','NO_REGRESSION');
     if(/بسيط|بسيطه|مختصر/.test(q)) preferences.push('CONCISE');
     if(/اعلى|افضل|احتراف|مهني/.test(q)) preferences.push('MAXIMIZE_QUALITY_WITHIN_CONTRACT');
@@ -138,17 +156,19 @@
     const eg=explicitGrade(request,input?.grade||context.grade);
     const gradeInfo=eg||inferGradeFromEvidence(request,subjectInfo.value,records);
     const artifact=detectArtifact(request),task=detectTask(request),audience=detectAudience(request,context);
-    const req=deriveRequirements(request,artifact,subjectInfo.value,task);
+    const req=deriveRequirements(request,artifact,subjectInfo.value,task,context);
     const unresolved=[];
     if(!request) unresolved.push('goal');
     if(!subjectInfo.value) unresolved.push('subject');
     if(!gradeInfo?.value&&['lesson','worksheet'].includes(task)) unresolved.push('grade');
     const contract={
       schema:'KEFAYAT_INTENT_CONTRACT_V1',
+      engine_version:'1.1',
       request,
       goal:request,
       role:context.role||'teacher',
       audience,
+      context_scope:context.education_system==='palestinian'?'PALESTINIAN_EDUCATION':(context.context_scope||null),
       task_type:task,
       subject:subjectInfo.value,
       subject_resolution:subjectInfo,
@@ -171,12 +191,12 @@
 
   function retrieveEvidence(contract,records=[],limit=6){
     if(!contract||!Array.isArray(records)) return [];
-    const terms=tokenize(contract.request).filter(t=>t.length>2);
+    const terms=evidenceTerms(contract.request);
     return records.filter(r=>(!contract.subject||r.subject===contract.subject)&&(!contract.grade||Number(r.grade)===Number(contract.grade)))
       .map(r=>{
         const hay=normalizeArabic([r.id,r.main_competency,r.sub_competency,r.domain,r.criterion,r.source_text].join(' '));
         let score=(contract.subject===r.subject?50:0)+(contract.grade&&Number(contract.grade)===Number(r.grade)?25:0);
-        for(const t of terms) if(hay.includes(t)) score+=Math.min(8,t.length);
+        for(const t of terms) if(hay.includes(t)) score+=isNumericToken(t)?14:Math.min(8,t.length);
         return {record:r,score};
       }).sort((a,b)=>b.score-a.score).slice(0,limit).map(x=>x.record);
   }
