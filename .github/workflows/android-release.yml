@@ -28,9 +28,11 @@ jobs:
         run: |
           node --check intent/intent-engine.js
           node --check artifact/pdf-artifact-engine.js
+          node --check artifact/android-webview-bridge.js
           python tests/test_intent_contract_engine.py
           python tests/test_pdf_artifact_engine.py
           python tests/test_index_javascript_syntax.py
+          python tests/test_android_pdf_bridge_contract.py
       - name: Stage production workspace
         run: |
           set -euo pipefail
@@ -39,11 +41,12 @@ jobs:
           cp index.html ai.html sw.js manifest.webmanifest android/app/src/main/assets/
           cp knowledge/competencies.json android/app/src/main/assets/knowledge/
           cp intent/intent-engine.js android/app/src/main/assets/intent/
-          cp artifact/pdf-artifact-engine.js android/app/src/main/assets/artifact/
+          cp artifact/pdf-artifact-engine.js artifact/android-webview-bridge.js android/app/src/main/assets/artifact/
           test -s android/app/src/main/assets/index.html
           test -s android/app/src/main/assets/knowledge/competencies.json
           test -s android/app/src/main/assets/intent/intent-engine.js
           test -s android/app/src/main/assets/artifact/pdf-artifact-engine.js
+          test -s android/app/src/main/assets/artifact/android-webview-bridge.js
       - uses: android-actions/setup-android@v3
       - name: Install Android SDK 36
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
@@ -78,8 +81,10 @@ jobs:
           unzip -Z1 "$APK" | grep -Fx 'assets/knowledge/competencies.json'
           unzip -Z1 "$APK" | grep -Fx 'assets/intent/intent-engine.js'
           unzip -Z1 "$APK" | grep -Fx 'assets/artifact/pdf-artifact-engine.js'
+          unzip -Z1 "$APK" | grep -Fx 'assets/artifact/android-webview-bridge.js'
           unzip -p "$APK" assets/index.html | grep -Fq 'Intent Contract'
           unzip -p "$APK" assets/index.html | grep -Fq 'KefayatArtifact'
+          unzip -p "$APK" assets/artifact/android-webview-bridge.js | grep -Fq 'KefayatAndroid.appendPdfChunk'
       - name: Verify AAB exists
         run: test -s android/app/build/outputs/bundle/release/app-release.aab
       - name: Record signed artifact identities
