@@ -1,5 +1,5 @@
-const CACHE = 'kefayat-shell-v2-intent';
-const CORE = ['./', './index.html', './intent/intent-engine.js', './manifest.webmanifest'];
+const CACHE = 'kefayat-shell-v3-fulfillment';
+const CORE = ['./', './index.html', './intent/intent-engine.js', './artifact/pdf-artifact-engine.js', './manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)).then(() => self.skipWaiting()));
