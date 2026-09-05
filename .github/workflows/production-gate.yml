@@ -13,6 +13,12 @@ on:
       - 'autonomy/**'
       - 'quality/**'
       - 'governance/**'
+      - 'state/**'
+      - 'baselines/**'
+      - 'evidence/**'
+      - 'operating/**'
+      - 'GEM_KNOWLEDGE_PACK/**'
+      - 'tests/**'
       - 'android/**'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -35,6 +41,8 @@ jobs:
           python-version: '3.12'
       - name: Rebuild structured knowledge
         run: python tools/build_competencies.py
+      - name: Protected verified-baseline regression
+        run: python tests/test_verified_baseline_control_plane.py
       - name: Deterministic production smoke
         run: python tools/production_smoke.py
       - name: Autonomy regression
