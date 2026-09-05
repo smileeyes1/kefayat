@@ -6,27 +6,35 @@ on:
       - 'index.html'
       - 'intent/**'
       - 'artifact/**'
+      - 'android/**'
       - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
       - 'tests/test_intent_contract_engine.py'
       - 'tests/test_pdf_artifact_engine.py'
+      - 'tests/test_android_pdf_bridge_contract.py'
       - 'autonomy/test_intent_routing.py'
       - 'autonomy/test_wisdom_governance.py'
       - 'quality/test_go_gate.py'
       - 'sw.js'
       - '.github/workflows/intent-fulfillment-regression.yml'
+      - '.github/workflows/production-gate.yml'
+      - '.github/workflows/android-release.yml'
   pull_request:
     paths:
       - 'index.html'
       - 'intent/**'
       - 'artifact/**'
+      - 'android/**'
       - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
       - 'tests/test_intent_contract_engine.py'
       - 'tests/test_pdf_artifact_engine.py'
+      - 'tests/test_android_pdf_bridge_contract.py'
       - 'autonomy/test_intent_routing.py'
       - 'autonomy/test_wisdom_governance.py'
       - 'quality/test_go_gate.py'
       - 'sw.js'
       - '.github/workflows/intent-fulfillment-regression.yml'
+      - '.github/workflows/production-gate.yml'
+      - '.github/workflows/android-release.yml'
   workflow_dispatch:
 
 permissions:
@@ -48,11 +56,14 @@ jobs:
         run: |
           node --check intent/intent-engine.js
           node --check artifact/pdf-artifact-engine.js
+          node --check artifact/android-webview-bridge.js
           python tests/test_index_javascript_syntax.py
       - name: Intent Contract + Fulfillment adversarial regression
         run: python tests/test_intent_contract_engine.py
       - name: Real PDF artifact serializer regression
         run: python tests/test_pdf_artifact_engine.py
+      - name: Android PDF bridge contract
+        run: python tests/test_android_pdf_bridge_contract.py
       - name: Legacy intent-routing non-regression
         run: python autonomy/test_intent_routing.py
       - name: Wisdom governance non-regression
