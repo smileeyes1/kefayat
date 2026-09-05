@@ -3,6 +3,21 @@ name: Kefayat Ω Autonomous Control Loop
 on:
   schedule:
     - cron: '*/15 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'governance/verified-baseline-control-plane.md'
+      - 'state/verified-state.json'
+      - 'baselines/**'
+      - 'evidence/imported/**'
+      - 'operating/BOOTSTRAP.md'
+      - 'GEM_KNOWLEDGE_PACK/00_KB_INDEX_AND_AUTHORITY.md'
+      - 'GEM_KNOWLEDGE_PACK/02_MATH_VISUAL_CONSTITUTION.md'
+      - 'GEM_KNOWLEDGE_PACK/KEFAYAT_OMEGA_MASTER_KNOWLEDGE_AR_v2.md'
+      - 'autonomy/controller.py'
+      - 'autonomy/mission-plan.json'
+      - 'autonomy/test_controller.py'
+      - '.github/workflows/autonomy.yml'
   workflow_dispatch:
 
 concurrency:
