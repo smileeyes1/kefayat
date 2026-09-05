@@ -2,15 +2,15 @@
   "mission_id": "KEFAYAT-AUTO-001",
   "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
   "phase": "CONTROL_LOOP",
-  "status": "SAFE_STOP",
+  "status": "RUNNING",
   "completed_tasks": [
     "PLAN_VALIDATED",
     "KB_VALIDATED",
     "STATE_INTEGRITY_CHECKED",
-    "RELEASE_GATE_CHECKED",
     "AUTOMATED_REGRESSION_VALIDATED",
     "GITHUB_PAGES_DEPLOYMENT_VALIDATED",
-    "FINAL_AUDIT_RECORDED"
+    "FINAL_AUDIT_RECORDED",
+    "BASELINE_CONTROL_PLANE_VALIDATED"
   ],
   "open_gaps": [
     "RUNTIME_BROWSER_DEVICE_EVIDENCE",
@@ -20,19 +20,19 @@
     "OFFICIAL_SOURCE_VERIFICATION"
   ],
   "blockers": [
-    "EXTERNAL_RUNTIME_FIELD_EVIDENCE_REQUIRED_FOR_FIELD_READY",
-    "STAGNATION_DETECTED"
+    "EXTERNAL_RUNTIME_FIELD_EVIDENCE_REQUIRED_FOR_FIELD_READY"
   ],
   "attempt_counters": {},
-  "stagnant_cycles": 40,
-  "last_checkpoint": "2026-09-05T15:57:16Z",
+  "stagnant_cycles": 0,
+  "last_checkpoint": "2026-09-05T17:41:29Z",
   "artifact_identities": {
-    "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1"
+    "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1",
+    "control_plane_fingerprint": "6523a428cb887e5237556afbeec50a227025379035830c4a8eb2caf5ec31854b"
   },
-  "evidence_state": "SOFTWARE_SCOPE_PROVEN",
+  "evidence_state": "VERIFIED_SOURCE_SCOPE",
   "claim_state": "GO_SOFTWARE_SCOPE_ONLY",
   "release_state": "GO_SOFTWARE_CONDITIONAL_RUNTIME_FIELD",
-  "next_best_action": "RECOVER_OR_ESCALATE",
+  "next_best_action": "VALIDATE_BASELINE_CONTROL_PLANE",
   "history": [
     {
       "action": "FINAL_AUDIT",
@@ -263,6 +263,11 @@
       "action": "RECOVER_OR_ESCALATE",
       "status": "SAFE_STOP",
       "checkpoint": "2026-09-05T15:57:16Z"
+    },
+    {
+      "action": "VALIDATE_BASELINE_CONTROL_PLANE",
+      "status": "RUNNING",
+      "checkpoint": "2026-09-05T17:41:29Z"
     }
   ]
 }
