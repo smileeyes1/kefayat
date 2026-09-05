@@ -5,9 +5,12 @@ on:
     paths:
       - 'index.html'
       - 'intent/**'
+      - 'artifact/**'
       - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
       - 'tests/test_intent_contract_engine.py'
+      - 'tests/test_pdf_artifact_engine.py'
       - 'autonomy/test_intent_routing.py'
+      - 'autonomy/test_wisdom_governance.py'
       - 'quality/test_go_gate.py'
       - 'sw.js'
       - '.github/workflows/intent-fulfillment-regression.yml'
@@ -15,9 +18,12 @@ on:
     paths:
       - 'index.html'
       - 'intent/**'
+      - 'artifact/**'
       - 'governance/INTENT_FULFILLMENT_CONTRACT.md'
       - 'tests/test_intent_contract_engine.py'
+      - 'tests/test_pdf_artifact_engine.py'
       - 'autonomy/test_intent_routing.py'
+      - 'autonomy/test_wisdom_governance.py'
       - 'quality/test_go_gate.py'
       - 'sw.js'
       - '.github/workflows/intent-fulfillment-regression.yml'
@@ -41,11 +47,16 @@ jobs:
       - name: JavaScript syntax gate
         run: |
           node --check intent/intent-engine.js
+          node --check artifact/pdf-artifact-engine.js
           python tests/test_index_javascript_syntax.py
       - name: Intent Contract + Fulfillment adversarial regression
         run: python tests/test_intent_contract_engine.py
+      - name: Real PDF artifact serializer regression
+        run: python tests/test_pdf_artifact_engine.py
       - name: Legacy intent-routing non-regression
         run: python autonomy/test_intent_routing.py
+      - name: Wisdom governance non-regression
+        run: python autonomy/test_wisdom_governance.py
       - name: Production smoke
         run: python tools/production_smoke.py
       - name: Hard GO structural gate
