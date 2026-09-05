@@ -28,18 +28,18 @@ function usage(){try{const x=JSON.parse(localStorage.getItem(USAGE)||'{}');retur
 function bump(){localStorage.setItem(USAGE,JSON.stringify({date:new Date().toISOString().slice(0,10),count:usage()+1}))}
 function key(){return localStorage.getItem(KEY)||''} function saveKey(k){k?localStorage.setItem(KEY,k):localStorage.removeItem(KEY)}
 function rows(g='all',s='all',q=''){q=norm(q);return S.records.filter(r=>(g==='all'||String(r.grade)===g)&&(s==='all'||r.subject===s)&&(!q||[r.id,r.main_competency,r.sub_competency,r.domain,r.criterion,r.source_text].some(v=>norm(v).includes(q))))}
-function inferMission(text,grade,subject){
+function inferMission(text,grade,subjectHint){
  const q=norm(text);
- const explicit=subject&&subject!=='all'?subject:null;
+ const explicit=subjectHint&&subjectHint!=='all'?subjectHint:null;
  const scores={mathematics:0,arabic:0,islamic_education:0,nurturing:0};
  if(/رياض|عدد|اعداد|جمع|طرح|ضرب|قسمة|كمية|عد|رقم|هندسة|قياس|مساله/.test(q))scores.mathematics+=8;
  if(/حرف|قراءة|كتابة|استماع|تحدث|لغة|نص|هجاء/.test(q))scores.arabic+=8;
  if(/وضوء|صلاة|قران|قرآن|حديث|سيرة|اسلام|إسلام|عبادة/.test(q))scores.islamic_education+=8;
  if(/حواس|اسرة|اسرتي|اسره|بيئة|حيوان|نبات|فصول|مواطن|مدرسة|مجتمع|فلسطين/.test(q))scores.nurturing+=8;
  const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
- const subject=explicit||((ranked[0]&&ranked[0][1]>0)?ranked[0][0]:'unknown');
+ const resolvedSubject=explicit||((ranked[0]&&ranked[0][1]>0)?ranked[0][0]:'unknown');
  const gr=grade&&grade!=='all'?Number(grade):null;
- return {goal:text.trim(),grade:gr,subject,role:S.role,taskType:/درس|تحضير|خطة|تعليم/.test(q)?'lesson':'mission',scores};
+ return {goal:text.trim(),grade:gr,subject:resolvedSubject,role:S.role,taskType:/درس|تحضير|خطة|تعليم/.test(q)?'lesson':'mission',scores};
 }
 function retrieveMission(m){
  let candidates=S.records.filter(r=>m.grade==null||String(r.grade)===String(m.grade));
