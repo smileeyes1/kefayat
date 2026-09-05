@@ -11,18 +11,26 @@ REQUIRED_FILES = [
     "README.md",
     "index.html",
     "manifest.webmanifest",
+    "intent/intent-engine.js",
+    "artifact/pdf-artifact-engine.js",
     "knowledge/competencies.json",
     "governance/WISDOM_GOVERNANCE.md",
+    "governance/INTENT_FULFILLMENT_CONTRACT.md",
     "governance/CONTINUITY_AND_COMPLETION_CONTRACT.md",
     "governance/PROFESSIONAL_RELEASE_STANDARD.md",
     "quality/test_go_gate.py",
     "quality/test_production_contract.py",
     "quality/test_release_contract.py",
+    "quality/test_runtime_browser.py",
     "autonomy/test_controller.py",
     "autonomy/test_mission_plan.py",
     "autonomy/test_intent_routing.py",
     "autonomy/test_wisdom_governance.py",
+    "tests/test_intent_contract_engine.py",
+    "tests/test_pdf_artifact_engine.py",
+    ".github/workflows/intent-fulfillment-regression.yml",
     ".github/workflows/autonomy-regression.yml",
+    ".github/workflows/production-gate.yml",
     ".github/workflows/pages.yml",
 ]
 
@@ -32,12 +40,14 @@ REQUIRED_FILES = [
 CLAIM_SCAN_FILES = [
     "README.md",
     "index.html",
-    "manifest.webmanifest",
+    "intent/intent-engine.js",
     "governance/WISDOM_GOVERNANCE.md",
+    "governance/INTENT_FULFILLMENT_CONTRACT.md",
     "governance/CONTINUITY_AND_COMPLETION_CONTRACT.md",
     "governance/PROFESSIONAL_RELEASE_STANDARD.md",
     "autonomy/controller.py",
     ".github/workflows/autonomy-regression.yml",
+    ".github/workflows/production-gate.yml",
     ".github/workflows/pages.yml",
 ]
 
@@ -66,8 +76,15 @@ def main() -> None:
 
     html = read("index.html")
     assert len(html) > 1000
-    for marker in ("كفايات Ω", "inferMission", "retrieveMission", "WISDOM", "Cross-Domain", "القيادة الذاتية"):
+    for marker in ("كفايات Ω", "inferMission", "retrieveMission", "WISDOM", "Cross-Domain", "القيادة الذاتية", "Intent Contract", "Acceptance Oracle", "KefayatArtifact"):
         assert marker in html, f"critical product marker missing: {marker}"
+
+    intent = read("intent/intent-engine.js")
+    for marker in ("compileContract", "inferGradeFromEvidence", "retrieveEvidence", "acceptanceOracle", "P0_GOLDEN_RENDER"):
+        assert marker in intent, f"intent engine marker missing: {marker}"
+    artifact = read("artifact/pdf-artifact-engine.js")
+    for marker in ("serializeImagePdf", "buildLessonPdf", "semanticMath", "EXPLICIT_TOKEN_GEOMETRY_TO_CANVAS_RASTER_PDF"):
+        assert marker in artifact, f"artifact engine marker missing: {marker}"
 
     manifest = json.loads(read("manifest.webmanifest"))
     assert manifest.get("lang") == "ar" and manifest.get("dir") == "rtl"
@@ -78,9 +95,12 @@ def main() -> None:
         assert marker in controller, f"bounded autonomy marker missing: {marker}"
 
     pages = read(".github/workflows/pages.yml")
-    assert "actions/deploy-pages@v4" in pages
-    assert "Runtime smoke test" in pages
-    assert "curl --fail" in pages
+    for marker in ("actions/deploy-pages@v4", "Runtime smoke test", "curl --fail", "test_intent_contract_engine.py", "test_pdf_artifact_engine.py", "test_runtime_browser.py"):
+        assert marker in pages, f"Pages release gate missing: {marker}"
+
+    production = read(".github/workflows/production-gate.yml")
+    for marker in ("Intent Contract + Fulfillment regression", "PDF artifact serializer regression", "browser-runtime", "poppler-utils", "assets/intent/intent-engine.js", "assets/artifact/pdf-artifact-engine.js"):
+        assert marker in production, f"Production gate missing: {marker}"
 
     workflow = read(".github/workflows/autonomy-regression.yml")
     for marker in ("test_go_gate.py", "test_professional_release.py", "test_intent_routing.py", "test_wisdom_governance.py"):
@@ -91,8 +111,8 @@ def main() -> None:
     assert not hits, f"unsupported production claim detected: {hits}"
 
     print("PROFESSIONAL RELEASE GATE: PASS")
-    print("Evidence posture: BUILT/TESTED controls structurally present")
-    print("Deployment and runtime claims remain evidence-scoped")
+    print("Evidence posture: intent/fulfillment/PDF controls structurally present")
+    print("Physical-device, Gemini-runtime, and school-field claims remain evidence-scoped")
 
 
 if __name__ == "__main__":
