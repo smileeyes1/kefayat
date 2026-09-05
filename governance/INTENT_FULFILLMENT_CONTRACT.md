@@ -1,4 +1,4 @@
-# KEFAYAT Ω — INTENT CONTRACT & FULFILLMENT CONSTITUTION v1.0
+# KEFAYAT Ω — INTENT CONTRACT & FULFILLMENT CONSTITUTION v1.1
 
 ## Purpose
 The system must not stop at classifying a request. It must preserve and fulfill the user's actual intended outcome with the least necessary burden, while remaining evidence-bounded and regression-safe.
@@ -30,9 +30,12 @@ Resolve missing fields in this order:
 4. evidence-backed inference from the knowledge base;
 5. safe domain inference.
 
-A weak keyword heuristic must not manufacture a material fact. In particular, the mere word `درس` does not prove Grade 1.
+A weak keyword heuristic must not manufacture a material fact. In particular, the mere word `درس` does not prove Grade 1, and a generic phrase such as `عدد الصفحات` does not by itself prove a mathematics intent.
 
 If a field is material to correctness and cannot be resolved with sufficient evidence, mark it unresolved. Continue every safe subtask that does not depend on it. Ask the user only when the missing fact is genuinely non-delegable and no safe evidence-backed route remains.
+
+## Domain isolation
+`Cross-Domain contamination` is a blocking failure. Evidence from another subject may be used only when the intent contract explicitly requires a cross-domain design and the provenance/role of each source remains visible. A convenient but unrelated record must never fill a missing same-domain evidence gap.
 
 ## Fulfillment Engine
 Execution must be contract-driven, not prompt-shaped. It must:
