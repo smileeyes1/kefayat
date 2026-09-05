@@ -58,6 +58,25 @@ public class MainActivity extends Activity {
                 String value = uri == null ? "" : uri.toString();
                 return !(value.startsWith(LOCAL_PREFIX) || value.startsWith("about:blank"));
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                if (url != null && url.startsWith(LOCAL_PREFIX)) {
+                    // Keep Android-specific transport outside the web artifact. The adapter
+                    // wraps KefayatArtifact.downloadArtifact only inside this trusted shell.
+                    view.evaluateJavascript(
+                        "(function(){if(!window.__KEFAYAT_ANDROID_PDF_ADAPTER_LOADING__){" +
+                        "window.__KEFAYAT_ANDROID_PDF_ADAPTER_LOADING__=true;" +
+                        "var s=document.createElement('script');" +
+                        "s.src='file:///android_asset/artifact/android-webview-bridge.js';" +
+                        "s.onload=function(){window.__KEFAYAT_ANDROID_PDF_ADAPTER_LOADING__=false;};" +
+                        "s.onerror=function(){window.__KEFAYAT_ANDROID_PDF_ADAPTER_LOADING__=false;};" +
+                        "document.head.appendChild(s);}})();",
+                        null
+                    );
+                }
+            }
         });
 
         setContentView(web);
