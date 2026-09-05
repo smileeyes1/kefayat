@@ -2,7 +2,7 @@
   "mission_id": "KEFAYAT-AUTO-001",
   "baseline_id": "MASTER-OMEGA-vΩ.7.4-OAC-01-OAG-01",
   "phase": "CONTROL_LOOP",
-  "status": "RUNNING",
+  "status": "WAITING_EXTERNAL_EVIDENCE",
   "completed_tasks": [
     "PLAN_VALIDATED",
     "KB_VALIDATED",
@@ -25,7 +25,7 @@
   ],
   "attempt_counters": {},
   "stagnant_cycles": 0,
-  "last_checkpoint": "2026-09-05T18:08:41Z",
+  "last_checkpoint": "2026-09-05T18:16:28Z",
   "artifact_identities": {
     "competencies.json": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1",
     "control_plane_fingerprint": "6523a428cb887e5237556afbeec50a227025379035830c4a8eb2caf5ec31854b"
@@ -33,7 +33,7 @@
   "evidence_state": "VERIFIED_SOURCE_SCOPE",
   "claim_state": "SOURCE BASELINE VERIFIED; PLATFORM RUNTIME NOT PROVEN",
   "release_state": "CONTROL_PLANE_READY__PLATFORM_RUNTIME_NOT_PROVEN",
-  "next_best_action": "CHECK_RELEASE_GATE",
+  "next_best_action": "WAIT_FOR_EXTERNAL_EVIDENCE_OR_CONTROL_PLANE_CHANGE",
   "history": [
     {
       "action": "FINAL_AUDIT",
