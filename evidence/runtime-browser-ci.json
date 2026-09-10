@@ -1,0 +1,48 @@
+{
+  "schema": "KEFAYAT_RUNTIME_BROWSER_EVIDENCE_V1",
+  "source": {
+    "workflow": "Production Gate",
+    "run_id": 33983536184,
+    "job": "browser-runtime",
+    "job_id": 101352929547,
+    "head_sha": "fd463aa5037c0275477de009b2e726d97770b8d3",
+    "artifact_id": 9974462257,
+    "artifact_name": "kefayat-browser-runtime-evidence",
+    "artifact_digest": "sha256:bd0d268253ecf73060cc9fd967bb0f7afb9a6a9526e9275fb046a7af6c14ff9f",
+    "artifact_expires_at": "2026-12-04T18:16:22Z"
+  },
+  "captured": {
+    "generated_at_utc": "2026-09-05T18:17:17Z",
+    "scope": "REAL_CHROMIUM_LOCAL_RELEASE_TREE",
+    "chromium_version": "140.0.7339.16",
+    "decision": "PASS_BROWSER_RUNTIME_SCOPE",
+    "report_sha256": "f49d709a999c3f502d015438c181cb1b4bdc55ab2779b43bcb213615a5d4863b",
+    "desktop_offline_png_sha256": "8feaa253de315e57e3b21ca1634af506b4c415acb1702717185d729f9c55c7cd",
+    "mobile_offline_png_sha256": "1976e58b76489617e323c2695f8753edf9c4dbf47525e5a8bd482baf6fb22f61",
+    "release_tree_sha256": "242f1f0d33e654fd5f1c2f7234a26cea6da02188ef0133634e0364c1fefc2b91",
+    "competencies_json_sha256": "9b3c7ff329c69648b7d4426f7eb4b7629725827e516474d7d95b08f39443d3d1"
+  },
+  "verified_assertions": {
+    "desktop_online_runtime": "PASS",
+    "desktop_offline_runtime": "PASS",
+    "mobile_390px_online_runtime": "PASS",
+    "mobile_390px_offline_runtime": "PASS",
+    "service_worker_active_desktop": "PASS",
+    "service_worker_active_mobile": "PASS",
+    "offline_cache_fetch_desktop": "PASS",
+    "offline_cache_fetch_mobile": "PASS",
+    "rtl_document_direction": "PASS",
+    "horizontal_overflow_desktop": "PASS_NONE",
+    "horizontal_overflow_mobile": "PASS_NONE",
+    "page_errors_desktop": "PASS_NONE",
+    "page_errors_mobile": "PASS_NONE"
+  },
+  "explicitly_not_proven": [
+    "PHYSICAL_DEVICE",
+    "GEMINI_RUNTIME",
+    "SCHOOL_FIELD_PILOT",
+    "OFFICIAL_SOURCE_VERIFICATION"
+  ],
+  "claim_boundary": "This evidence proves the local release tree in real Chromium CI for desktop/mobile/offline scope only. It MUST NOT be used to claim physical-device, Gemini-runtime, school-field, or official-source qualification.",
+  "status": "PASS_WITH_SCOPED_CLAIM"
+}
